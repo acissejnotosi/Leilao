@@ -18,6 +18,7 @@ import java.net.SocketException;
 import java.security.PublicKey;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static leilao.InitSystem.procesosInteresados;
 
 /**
  *
@@ -26,18 +27,13 @@ import java.util.logging.Logger;
 public class Cronometro extends Thread {
     
     DatagramSocket socket = null;
-     String pid;
-     String myport;
-     String hostport;
-     PublicKey pubKey;
-     String nomeProduto;
+    Process processo =null;
+    String nomeProduto;
 
-    public Cronometro(String pid, String myport, String hostport, String nomeProduto) {
-        this.pid = pid;
-        this.myport = myport;
-        this.hostport = hostport;
-        this.nomeProduto = nomeProduto;
-             
+    Cronometro(DatagramSocket socket, String nomeProduto ) {
+       this.socket = socket;
+       this.nomeProduto = nomeProduto;
+            
     }
     @Override
     public void run() {
@@ -50,27 +46,37 @@ public class Cronometro extends Thread {
            System.out.println("passei");
             try { 
                 int i=0;
-                while (i<5) {          
+                while (i<3) {          
                     i++;
                     Thread.sleep(10000); 
                 }
+                
+                for(Controle c:  procesosInteresados){
+                    if (c.getProdutoId().equals(nomeProduto)) {
+                            for(Process p: InitSystem.processList){
+                                if(p.getId().equals(c.getLancadorId())){ 
+                                    processo =p;
+                                    break;
+                                }   
+                            }
+                        }   
+                    }
                  System.out.println("saii");
                  ByteArrayOutputStream bos1 = new ByteArrayOutputStream(10);
                  ObjectOutputStream oos1 = new ObjectOutputStream(bos1);
-       
-                 oos1.writeUTF(pid);
-                 oos1.writeUTF(myport);
-                 oos1.writeUTF(nomeProduto);
+                 oos1.writeChar('F');
+                 oos1.writeUTF(processo.getId());
+                 oos1.writeUTF(processo.getPort());
+                 oos1.writeUTF(processo.getNomeProduto());
                  oos1.flush();
                 
                 byte[] output = bos1.toByteArray();
-                DatagramPacket messageOut1 = new DatagramPacket(output, output.length, InetAddress.getLocalHost(), Integer.parseInt(hostport));
+                DatagramPacket request = new DatagramPacket(output, output.length,InetAddress.getLocalHost(), Integer.parseInt(processo.getPort()));
                 System.out.println("");    
                 System.out.print("[UNICAST - SEND]");
-                System.out.print(" Voce venceu o Leilao " + pid);
-                System.out.print(" Proudut0  " + nomeProduto);
-                        
-                socket.send(messageOut1);
+                System.out.print("Vencedor do leilo: " + processo.getId());
+                System.out.print("Produto arrematado:" + nomeProduto);     
+                socket.send(request);
                 System.out.println("");
             }
               

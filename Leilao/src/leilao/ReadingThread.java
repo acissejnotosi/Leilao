@@ -151,12 +151,11 @@ public class ReadingThread extends Thread {
                             String id = ois.readUTF();
                             String idProduto = ois.readUTF();
                             String novoValor = ois.readUTF();
+                            atualizaValorProduto(idProduto);
                             
   
 
-                           
-                           
-                           
+               
                    
 
                 }

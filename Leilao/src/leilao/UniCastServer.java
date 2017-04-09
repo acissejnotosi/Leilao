@@ -13,6 +13,7 @@ import java.security.PublicKey;
 import java.sql.Timestamp;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static leilao.InitSystem.chave_publica;
 import static leilao.InitSystem.procesosInteresados;
 import static leilao.InitSystem.processList;
 import static leilao.InitSystem.produtosLancados;
@@ -137,15 +138,21 @@ public class UniCastServer extends Thread {
                         System.out.print("[UNICAST - RECEIVE]");
                         System.out.println("Requisicao de lance de processo: " + pid);
                         
+                        // verifica valor do lance maior de que valor do produto
+                        if (Integer.parseInt(process.getPrecoProduto()) > Integer.parseInt(lance)) {
+                            System.out.println("Valor do Lance no suficientes!");
+                            break;
+                        }
+                        
                        //alguem ja deu um lance nesse produto
-                       boolean jaLancado = true;
-                       if(!produtosLancados.isEmpty()){
+                       boolean lancar = true;
+                       if(produtosLancados.isEmpty()){
                             produtosLancados.add(idProduto);
-                            jaLancado = false;
+                            lancar = true;
                        }else{
                             for(String c:  InitSystem.produtosLancados){
                                  if (c.equals(idProduto)) {
-                                      jaLancado = true;
+                                      lancar = false;
                                         break;
                                  }
                              }
@@ -154,6 +161,7 @@ public class UniCastServer extends Thread {
 //                        long finish = System.currentTimeMillis();
 //                        long total = finish - start;
                        //Set novo preco do ultimo lance
+    
                         for(Process p: processList){
                             if (p.getId().equals(pid)) {
                                 p.setPrecoProduto(lance);
@@ -168,33 +176,48 @@ public class UniCastServer extends Thread {
                                    break;
                             }
                         }
-                              
-                        if(jaLancado){
-                            Cronometro cro = new Cronometro(socket,port,pid,idProduto);
+                        // Enviar multcast atualizando valor do produto 
+                        if(lancar){
+                            Cronometro cro = new Cronometro(socket,idProduto);
                             cro.start();
-                           
-//                            Temporizador temporizador = new Temporizador(pid,idProduto);
-//                            temporizador.start();
                             System.out.println("Leilao Inicializado produtoID:"+idProduto);
+                            atualizaValorCliente(pid,idProduto,lance);
+                        }else{
+                            System.out.println("Lancar Notificaçao para outro interesado");
+                            
                         }
                         
                          break;
+                     case ('F'):
+                     //Finaliza Leilao tempo estorado
+                         pid = ois.readUTF();
+                         port = ois.readUTF();
+                         idProduto = ois.readUTF();
+                         
+                       System.out.print("[UNICAST - RECEIVE]");
+                       System.out.print(" ID do participante: " + pid);
+                       System.out.print(", Porta: " + port);
+                       System.out.println("\nProduto arrematado com sucesso"+idProduto );
+                    
+//                       for(Controle c:  procesosInteresados){
+//                            if (c.isTempoFinalizado()) {
+//                                 System.out.println("Compra Finalizada!!");
+//                                 break;
+//                            }
+//                        }
                        
                        
+                       
+                       
+                       
+                     break;
                             
                 }
                  System.out.println("kkk");
                 
                 
                 
-                if(teste){
-                    System.out.println("sucesso!");
-                    teste = false;
-                }
-                 if(InitSystem.lance){
-                    System.out.println("sucesso lance!");
-                    InitSystem.lance = false;
-                }
+            
 //               switch (InitSystem.getTipo()) {
 //                    // ********************************************
 //                    // Tipos supported:
@@ -245,6 +268,29 @@ public class UniCastServer extends Thread {
 
     public static void setTeste(boolean teste) {
         UniCastServer.teste = teste;
+    }
+    
+    public void atualizaValorCliente(String id, String idProduto, String novoValor) throws IOException{
+        
+                        System.out.println("");    
+                        System.out.print("[MULTICAST - SEND]");
+                        System.out.print("Atualiza valores de produto");
+            
+                        // *********************************************
+                        // Packing transaction validation.
+                        ByteArrayOutputStream bos = new ByteArrayOutputStream(10);
+                        ObjectOutputStream oos = new ObjectOutputStream(bos);
+                        oos.writeChar('A');
+                        oos.writeUTF(id);
+                        oos.writeUTF(idProduto);
+                        oos.writeUTF(novoValor);
+     
+                        oos.flush();
+                        
+                        byte[] m1 = bos.toByteArray();
+                        DatagramPacket messageOut = new DatagramPacket(m1, m1.length, group, MULT_PORT);
+                        s.send(messageOut);
+    
     }
 
     

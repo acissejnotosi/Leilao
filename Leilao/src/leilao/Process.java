@@ -74,6 +74,9 @@ class Process implements Serializable {
     public String imprimaProcessos() {
         return "Participante: " + id + ", Porta: " + port;
     }
+    public String imprimaParticipantes() {
+        return "Participante: " + id;
+    }
 
     public void setId(String id) {
         this.id = id;

@@ -14,7 +14,9 @@ public class Controle {
    private String produtoId;
    private String lancadorId;
    private long tempo;
+   private boolean tempoFinalizado = false;
    private String ultimo;
+
 
     public Controle(String produtoId, String ultimoLance) {
         this.produtoId = produtoId;
@@ -54,6 +56,16 @@ public class Controle {
     public void setUltimo(String ultimo) {
         this.ultimo = ultimo;
     }
+
+    public boolean isTempoFinalizado() {
+        return tempoFinalizado;
+    }
+
+    public void setTempoFinalizado(boolean tempoFinalizado) {
+        this.tempoFinalizado = tempoFinalizado;
+    }
+    
+    
    
    
     
