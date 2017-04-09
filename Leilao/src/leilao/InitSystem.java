@@ -39,6 +39,7 @@ public class InitSystem {
     static ArrayList<Process> processList = new ArrayList<>();
     static List<Controle> procesosInteresados = new ArrayList<>();
     static List<String> produtosLancados = new ArrayList<>();
+    static List<Product> listaProdutos = new ArrayList<>();
     static PublicKey chave_publica = null;
     static boolean lance = false;
     static char tipo;
@@ -50,6 +51,7 @@ public class InitSystem {
         MulticastSocket s = null;
         DatagramSocket socket = null;
         Process process = null;
+        Product product = null;
         GeraChave gera_chave = null;
         PrivateKey chave_privada = null;
 
@@ -59,12 +61,12 @@ public class InitSystem {
         socket = new DatagramSocket();
 
         // ********************************************
-        // Receiving data from user
-        String id;
-        String port;
-        String nomeProduto;
-        String idProduto;
-        String descProduto;
+        // Receve dados do usuário
+        String id; // ID do processo.
+        String port; // Porta de comunicação Unicast para o produto
+        String nomeProduto; // nome do Produto
+        String idProduto; // ID do produto
+        String descProduto; // descrição do Pruduto
         String precoProduto;
         String tempoFinal = "120000"; //para que cada produto tenha um tempo de leilão de 2 min
 
@@ -82,37 +84,54 @@ public class InitSystem {
             strBuilder.append(String.valueOf(k));
 
         }
-       
+       //************************************************
+       // Recebe os dados do usuário
         Scanner in = new Scanner(System.in);
-        System.out.println("Informe o número do participante:");
+        System.out.println("Informe a ID do participante:");
         id = name;
 
         System.out.println("Informe a porta para comunicação UNICAST:");
-//      port = in.nextLine();
         port = strBuilder.toString();
 
         System.out.println("Informe o nome do produto:");
-//      nomeProduto = in.nextLine();
         nomeProduto = strBuilder.toString();
+        
         System.out.println("Informe o id do produto:");
-//       idProduto = in.nextLine();
         idProduto = strBuilder.toString();
+        
         System.out.println("Informe descricao do produto:");
-//      descProduto = in.nextLine();
         descProduto = strBuilder.toString();
+        
         System.out.println("Informe o preço do produto:");
-//      precoProduto = in.nextLine();
         precoProduto = strBuilder.toString();
+        
+        
         // ********************************************
-        // Generating keys for this process
+        // Gera as chaves do processo
         gera_chave = new GeraChave();
         gera_chave.geraChave();
         chave_privada = gera_chave.getChavePrivada();
         chave_publica = gera_chave.getChavePublica();
 
+        //*********************************************
+        //Cria um novo processo
         process = new Process(id, port, chave_publica, nomeProduto, idProduto, descProduto, precoProduto);
-
+        
+        //*********************************************
+        //Adiciona o processo a lista de processos
         InitSystem.processList.add(process);
+        
+        //*********************************************
+        //Cria um novo produto
+        product = new Product(idProduto, nomeProduto, descProduto, precoProduto, tempoFinal);
+        
+        //*********************************************
+        //Adiciona o produto a lista de produtos
+        InitSystem.listaProdutos.add(product);
+
+        
+        //*********************************************
+        //Cria o controlador para os lances
         Controle controle = new Controle(idProduto, precoProduto);
         procesosInteresados.add(controle);
         ByteArrayOutputStream bos = new ByteArrayOutputStream(10);
@@ -129,14 +148,17 @@ public class InitSystem {
         oos.flush();
 
         // *********************************************
-        // Initializing multicast and unicast communication
+        // Inicialização da comunicação Multicast
         ReadingThread multCastComm = new ReadingThread(process, IP_MULTICAST, PORT_MULTICAST);
         multCastComm.start();
+        
+        //**********************************************
+        //Inicialização da comunicação Unicast
         UniCastServer uniCastComm = new UniCastServer(process, IP_MULTICAST, PORT_MULTICAST);
         uniCastComm.start();
 
         // *********************************************
-        // Sending multicast notification of its presence.
+        // Enviando através do multicast as informações sobre o processo
         byte[] m = bos.toByteArray();
         DatagramPacket messageOut = new DatagramPacket(m, m.length, group, PORT_MULTICAST);
 
@@ -152,20 +174,19 @@ public class InitSystem {
         s.send(messageOut);
 
         // *********************************************
-        // Interaction phase.
+        // Menu de interação com o usuário
         while (true) {
             String cmd;
 
             System.out.println("MENU");
             System.out.println("Pressione a tecla desejada:");
-            System.out.println("[P] Leiloar produto ");
+            System.out.println("[B] Dar um lance em um produto ");
             System.out.println("[L] Lista os processos ");
-            System.out.println("[T] Listar transacoes efetuadas ");
             System.out.println("[E] to Exit");
             cmd = in.nextLine().trim().toUpperCase();
             System.out.println("");
 
-            Iterator it;
+           // Iterator it;
             switch (cmd) {
 
                 case "B":
@@ -189,15 +210,8 @@ public class InitSystem {
                     }
                     System.out.println("Qual o produto?");
                     System.out.println("Produto seleciona:"+paux.getIdProduto());
-//                   String produtoId = in.nextLine();
                     String produtoId = paux.getIdProduto();
-//                    s.send(messageOut);
-      
-//                    if (paux == null || !paux.getId().equals(produtoId)) {
-//                        System.out.println("Process has not been found or self-buying, try again");
-//                        break;
-//                    }
-                    
+
                     
                     String sid = paux.getId();
                     String sport = paux.getPort();
@@ -207,18 +221,12 @@ public class InitSystem {
                     String sDescProduto = paux.getDescProduto();
                     String sPreco = paux.getPrecoProduto();
                     System.out.println("Valor Inicial:" + sPreco);
-
                     System.out.println("Qual valor do seu lance");
                     String lance = in.nextLine();
-
                     System.out.println("Seu lance:" + lance);
-//                    if (Integer.parseInt(sPreco) > Integer.parseInt(lance)) {
-//                        System.out.println("Seller has not enough coins to sell!");
-//                        break;
-//                    }
 
                     // *********************************************
-                    //empacotando mensagem apra mandar unicast
+                    //empacotando mensagem apra mandar em unicast
                     ByteArrayOutputStream bos1 = new ByteArrayOutputStream(10);
                     ObjectOutputStream oos1 = new ObjectOutputStream(bos1);
                     oos1.writeChar('B');
@@ -229,13 +237,13 @@ public class InitSystem {
 
                     oos1.flush();
 
-                    // sending unicast message to seller
+                    // Enviando mensagem de lance para o leiloero através do Unicast
                     byte[] output = bos1.toByteArray();
                     DatagramPacket messageOut1 = new DatagramPacket(output, output.length, InetAddress.getLocalHost(), Integer.parseInt(sport));
                     System.out.println("");
                     System.out.print("[UNICAST - SEND]");
-                    System.out.print(" Enviando Lance " + paux.getId());
-                    System.out.print(" Comprador  " + process.getId());
+                    System.out.print(" Enviando Lance para o processo de ID igual a " + paux.getId());
+                    System.out.print(" do Comprador cuja ID é " + process.getId());
 
                     socket.send(messageOut1);
                     break;
@@ -250,40 +258,14 @@ public class InitSystem {
                     s.close();
                     System.exit(0);
                     
-                case "V":
-                    
-                     if(UniCastServer.isTeste()){
-                         System.out.println("UniCastServer.isTeste() true");
-                     }
-                     UniCastServer.teste=true;
-                     if(UniCastServer.teste)
-                        System.out.println(" UniCastServer.teste=true true");
-                     if(UniCastServer.isTeste()){
-                         System.out.println("UniCastServer.isTeste() true");
-                     }
-                     UniCastServer.setTeste(true);
-                       if(UniCastServer.isTeste()){
-                         System.out.println("UniCastServer.isTeste() true");
-                     }
-                   break;
-                     
-                case "C":
-                     UniCastServer.teste=true;
-                     if(UniCastServer.teste)
-                        System.out.println(" UniCastServer.teste=true true");
-                     if(UniCastServer.isTeste()){
-                         System.out.println("UniCastServer.isTeste() true");
-                     }
-                     UniCastServer.setTeste(true);
-                       if(UniCastServer.isTeste()){
-                         System.out.println("UniCastServer.isTeste() true");
-                     }
-                   break;                
+                    break;          
              
             }
         }
     }
    
+    
+    
     
     public static void listarProcessos(){
           System.out.println("List of Process:");
