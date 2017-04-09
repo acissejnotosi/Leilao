@@ -48,7 +48,7 @@ public class Cronometro extends Thread {
                 int i=0;
                 while (i<3) {          
                     i++;
-                    Thread.sleep(10000); 
+                    Thread.sleep(20000); 
                 }
                 
                 for(Controle c:  procesosInteresados){
