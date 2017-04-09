@@ -113,13 +113,7 @@ public class InitSystem {
         chave_privada = gera_chave.getChavePrivada();
         chave_publica = gera_chave.getChavePublica();
 
-        //*********************************************
-        //Cria um novo processo
-        process = new Process(id, port, chave_publica, nomeProduto, idProduto, descProduto, precoProduto);
-        
-        //*********************************************
-        //Adiciona o processo a lista de processos
-        InitSystem.processList.add(process);
+      
         
         //*********************************************
         //Cria um novo produto
@@ -129,7 +123,14 @@ public class InitSystem {
         //Adiciona o produto a lista de produtos
         InitSystem.listaProdutos.add(product);
 
+          //*********************************************
+        //Cria um novo processo
+        process = new Process(id, port, chave_publica, (ArrayList<Product>) InitSystem.listaProdutos);
         
+        //*********************************************
+        //Adiciona o processo a lista de processos
+        InitSystem.processList.add(process);
+     
         //*********************************************
         //Cria o controlador para os lances
         Controle controle = new Controle(idProduto, precoProduto);
@@ -141,10 +142,7 @@ public class InitSystem {
         oos.writeUTF(id);
         oos.writeUTF(port);
         oos.writeObject(chave_publica);
-        oos.writeUTF(nomeProduto);
-        oos.writeUTF(idProduto);
-        oos.writeUTF(descProduto);
-        oos.writeUTF(precoProduto);
+        oos.writeObject(InitSystem.listaProdutos);
         oos.flush();
 
         // *********************************************
@@ -167,10 +165,8 @@ public class InitSystem {
         System.out.print(" ID do participante: " + id);
         System.out.print(", Porta: " + port);
         System.out.print(", Chave publica: - ");
-        System.out.print(", Nome produto: " + nomeProduto);
-        System.out.println(",ID Produto: " + idProduto);
-        System.out.print(",Descricao do produto: " + descProduto);
-        System.out.println(",Preco do produto: " + precoProduto);
+        System.out.print(", Tamanho da lista de produtos: " + listaProdutos.size());
+
         s.send(messageOut);
 
         // *********************************************
@@ -208,18 +204,25 @@ public class InitSystem {
                             break;
                         }
                     }
-                    System.out.println("Qual o produto?");
-                    System.out.println("Produto seleciona:"+paux.getIdProduto());
-                    String produtoId = paux.getIdProduto();
-
                     
+                    
+                    List<String> nomeProdutos = selecionarProdutosUmProcesso2(paux);
+                    
+                    System.out.println("Qual o produto?");
+                    String stringNomeProd = in.nextLine();
+                    System.out.println("Produto seleciona:"+paux.listaProdutos.get((Integer.parseInt(stringNomeProd))).getName());
+                    String produtoId = paux.listaProdutos.get(Integer.parseInt(stringNomeProd)).getId();
+                    //******************************************************
+                    //Informações do leiloero que estou dando lance
                     String sid = paux.getId();
                     String sport = paux.getPort();
                     PublicKey sPubKey = paux.getChavePublica();
-                    String sProduto = paux.getIdProduto();
+                //    String sProduto = p;
                     String sNomeProducto = paux.getNomeProduto();
                     String sDescProduto = paux.getDescProduto();
                     String sPreco = paux.getPrecoProduto();
+                    
+                    
                     System.out.println("Valor Inicial:" + sPreco);
                     System.out.println("Qual valor do seu lance");
                     String lance = in.nextLine();
@@ -266,6 +269,19 @@ public class InitSystem {
    
     
     
+    public static List<String> selecionarProdutosUmProcesso2(Process paux){
+          
+         List<String> idProdutosPAUmProcesso = null;
+        System.out.println("Lista de produtos:");
+                  
+          for( Product p: paux.getListaProdutos() ){
+                 System.out.println("Nome do produto desse processo:" + p.getName());
+                 idProdutosPAUmProcesso.add(p.getId());
+           }         
+          
+          return idProdutosPAUmProcesso;
+          
+   }
     
     public static void listarProcessos(){
           System.out.println("List of Process:");
