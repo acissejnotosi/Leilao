@@ -53,6 +53,7 @@ public class ReadingThread extends Thread {
 
     @Override
     public void run() {
+     
 
         byte[] buffer;
         char type; // type of message
@@ -143,6 +144,19 @@ public class ReadingThread extends Thread {
                             socket.send(messageOut);
                             break;
                         }
+                    
+                       case 'A':
+                            // *********************************************
+                            // Unpacking rest of the message update price of protucts
+                            String id = ois.readUTF();
+                            String idProduto = ois.readUTF();
+                            String novoValor = ois.readUTF();
+                            
+  
+
+                           
+                           
+                           
                    
 
                 }
@@ -156,5 +170,30 @@ public class ReadingThread extends Thread {
 
         }
     }
+    
+    
+    public Process ProcuraProcesso(String id){
+         Process processo = null;
+         for(Process p: processList){
+            if (p.getId().equals(id)) {
+                processo = p;
+                break;
+            }
+        }
+      return processo;
+
+    }
+    public void atualizaValorProduto(String idProduto){ 
+         Process processo = null;
+         for(Process p: processList){
+            if (p.getNomeProduto().equals(idProduto)) {
+                processo = p;
+                break;
+            }
+        }
+   
+    }
+    
+   
 
 }
