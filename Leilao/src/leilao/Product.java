@@ -46,6 +46,26 @@ public class Product {
     public String getTempoFinal() {
         return tempoFinal;
     }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
+    }
+
+    public void setPrecoInicial(String precoInicial) {
+        this.precoInicial = precoInicial;
+    }
+
+    public void setTempoFinal(String tempoFinal) {
+        this.tempoFinal = tempoFinal;
+    }
     
 
    

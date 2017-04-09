@@ -17,6 +17,8 @@ import java.net.MulticastSocket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,7 +46,7 @@ public class ReadingThread extends Thread {
         this.portMulticast = portMulticast;
 
         // ********************************************
-        // Inserts this thread into the Multicast Group.
+        // Isere essa thread na transmissão multicast
         group = InetAddress.getByName(ipMulticast);
         s = new MulticastSocket(portMulticast);
         s.joinGroup(group);
@@ -53,7 +55,6 @@ public class ReadingThread extends Thread {
 
     @Override
     public void run() {
-     
 
         byte[] buffer;
         char type; // type of message
@@ -65,10 +66,9 @@ public class ReadingThread extends Thread {
             try {
                 buffer = new byte[1024];
                 messageIn = new DatagramPacket(buffer, buffer.length);
-                
-                    s.receive(messageIn);
-                
-                
+
+                s.receive(messageIn);
+
                 msg = messageIn.getData();
                 bis = new ByteArrayInputStream(msg);
 
@@ -85,26 +85,24 @@ public class ReadingThread extends Thread {
                     case 'N':
                         String pid = ois.readUTF();
 
-                        // if msg id is of the this process, ignores it.
-                        if (pid.equals(process.getId()) ) {
+                        //**********************************************
+                        // Se a mensagem capturada é do próprio ID desse processo,então ela será ignorada.
+                        if (pid.equals(process.getId())) {
                             break;
                         } else {
                             // *********************************************
-                            // Unpacking rest of the message
+                            // Desempacotando o resto da mensagem
                             String port = ois.readUTF();
                             PublicKey chavePublica = (PublicKey) ois.readObject();
-                            String nomeProduto = ois.readUTF();
-                            String idProduto = ois.readUTF();
-                            String descProduto = ois.readUTF();
-                            String precoProduto = ois.readUTF();
+                            List<Product> listaProduto = (ArrayList<Product>) ois.readObject();
 
                             // *********************************************
-                            // Creating new process and add in the list of process
-                            Process novoProcesso = new Process(pid, port, chavePublica, nomeProduto, idProduto, descProduto, precoProduto);
+                            // Criando um novo processo e adicionando na lista de processos
+                            Process novoProcesso = new Process(pid, port, chavePublica, (ArrayList<Product>) listaProduto);
                             InitSystem.processList.add(novoProcesso);
 
                             // *********************************************
-                            // Sending to new process its infos.
+                            // Enviando para o novo processo essas informações
                             // Packing the message.
                             ByteArrayOutputStream bos = new ByteArrayOutputStream(10);
                             ObjectOutputStream oos = new ObjectOutputStream(bos);
@@ -112,51 +110,46 @@ public class ReadingThread extends Thread {
                             oos.writeUTF(process.getId());
                             oos.writeUTF(process.getPort());
                             oos.writeObject(process.getChavePublica());
-                            oos.writeUTF(process.getNomeProduto());
-                            oos.writeUTF(process.getIdProduto());
-                            oos.writeUTF(process.getDescProduto());
-                            oos.writeUTF(process.getPrecoProduto());
+                            oos.writeObject(process.getListaProdutos());
 
                             oos.flush();
 
-                             byte[] output = bos.toByteArray();
-                            DatagramPacket messageOut = new DatagramPacket(output, output.length, messageIn.getAddress(),Integer.parseInt(port));
+                            byte[] output = bos.toByteArray();
+                            DatagramPacket messageOut = new DatagramPacket(output, output.length, messageIn.getAddress(), Integer.parseInt(port));
                             System.out.println("");
                             System.out.print("[MULTICAST - RECEIVE]");
                             System.out.print(" ID do participante: " + pid);
                             System.out.print(", Porta: " + port);
                             System.out.print(", Chave publica: - ");
-                            System.out.print(", Nome produto: " + nomeProduto);
-                            System.out.println(",ID Produto: " + idProduto);
-                            System.out.print(",Descricao do produto: " + descProduto);
-                            System.out.println(",Preco do produto: " + precoProduto);
+                            for (Product p : listaProduto) {
+                                System.out.println("Informações sobre o " + p.getName()+ " produto da lista do processo " + pid);
+                                System.out.println(", ID Produto " + p.getName()+ ": " + p.getId());
+                                System.out.println(", Descrição Produto " + p.getName()+ ": " + p.getDescricao());
+                                System.out.println(", Preço Produto " + p.getName() + ": " + p.getPrecoInicial());
+                            }
 
                             System.out.println("");
                             System.out.print("[UNICAST - SEND]");
                             System.out.print(" ID do participante: " + pid);
                             System.out.print(", Porta: " + port);
                             System.out.print(", Chave publica: - ");
-                            System.out.print(", Nome produto: " + nomeProduto);
-                            System.out.println(",ID Produto: " + idProduto);
-                            System.out.print(",Descricao do produto: " + descProduto);
-                            System.out.println(",Preco do produto: " + precoProduto);
-
+                            for (Product p : listaProduto) {
+                                System.out.println("Informações sobre o " + p.getName()+ " produto da lista do processo " + pid);
+                                System.out.println(", ID Produto " + p.getName()+ ": " + p.getId());
+                                System.out.println(", Descrição Produto " + p.getName()+ ": " + p.getDescricao());
+                                System.out.println(", Preço Produto " + p.getName() + ": " + p.getPrecoInicial());
+                            }
                             socket.send(messageOut);
                             break;
                         }
-                    
-                       case 'A':
-                            // *********************************************
-                            // Unpacking rest of the message update price of protucts
-                            String id = ois.readUTF();
-                            String idProduto = ois.readUTF();
-                            String novoValor = ois.readUTF();
-                            atualizaValorProduto(idProduto);
-                            
-  
 
-               
-                   
+                    case 'A':
+                        // *********************************************
+                        // Desempacotando o resto da mensagem e atulizando o resto dos produtos.
+                        String id = ois.readUTF(); //id processo
+                        String idProduto = ois.readUTF();
+                        String novoValor = ois.readUTF();
+                        atualizaValorProduto(idProduto, novoValor);
 
                 }
 
@@ -164,35 +157,34 @@ public class ReadingThread extends Thread {
                 Logger.getLogger(ReadingThread.class.getName()).log(Level.SEVERE, null, ex);
             } catch (ClassNotFoundException ex) {
                 Logger.getLogger(ReadingThread.class.getName()).log(Level.SEVERE, null, ex);
-            
+
             }
 
         }
     }
-    
-    
-    public Process ProcuraProcesso(String id){
-         Process processo = null;
-         for(Process p: processList){
+
+    public Process ProcuraProcesso(String id) {
+        Process processo = null;
+        for (Process p : processList) {
             if (p.getId().equals(id)) {
                 processo = p;
                 break;
             }
         }
-      return processo;
+        return processo;
 
     }
-    public void atualizaValorProduto(String idProduto){ 
-         Process processo = null;
-         for(Process p: processList){
-            if (p.getNomeProduto().equals(idProduto)) {
-                processo = p;
+
+    public void atualizaValorProduto(String idProduto, String novoValor) {
+        
+        for (Product p : process.getListaProdutos()) {
+            if (p.getId().equals(idProduto)) {
+                p.setPrecoInicial(novoValor);
+              
                 break;
             }
         }
-   
+
     }
-    
-   
 
 }

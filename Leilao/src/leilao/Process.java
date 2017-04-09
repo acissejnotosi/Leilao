@@ -22,23 +22,21 @@ class Process implements Serializable {
     private  String descProduto;
     private  String precoProduto;
     private  PublicKey chavePublica;
-    static ArrayList<leilao> listaLeilao = new ArrayList<>();
+    static ArrayList<Product> listaProdutos = new ArrayList<>();
 
-    public Process(String id, String port, PublicKey chavePublica, String nomeProduto, String idProduto, String descProduto, String precoProduto) {
+    public Process(String id, String port, PublicKey chavePublica, ArrayList<Product> listaProdutos) {
         this.id = id;
         this.port = port;
         this.chavePublica = chavePublica;
-        this.nomeProduto = nomeProduto;
-        this.idProduto = idProduto;
-        this.descProduto = descProduto;
-        this.precoProduto = precoProduto;
+        this.listaProdutos = listaProdutos;
 
     }
 
-    public static void setListaLeilao(ArrayList<leilao> listaLeilao) {
-        Process.listaLeilao = listaLeilao;
+    public static ArrayList<Product> getListaProdutos() {
+        return listaProdutos;
     }
 
+  
 
     public String getId() {
         return id;
@@ -48,28 +46,10 @@ class Process implements Serializable {
         return port;
     }
 
-    public String getNomeProduto() {
-        return nomeProduto;
-    }
-
-    public String getIdProduto() {
-        return idProduto;
-    }
-
-    public String getDescProduto() {
-        return descProduto;
-    }
-
-    public String getPrecoProduto() {
-        return precoProduto;
-    }
-
     public PublicKey getChavePublica() {
         return chavePublica;
     }
-    public static ArrayList<leilao> getListaLeilao() {
-        return listaLeilao;
-    }
+
   
     public String imprimaProcessos() {
         return "Participante: " + id + ", Porta: " + port;
@@ -86,21 +66,6 @@ class Process implements Serializable {
         this.port = port;
     }
 
-    public void setNomeProduto(String nomeProduto) {
-        this.nomeProduto = nomeProduto;
-    }
-
-    public void setIdProduto(String idProduto) {
-        this.idProduto = idProduto;
-    }
-
-    public void setDescProduto(String descProduto) {
-        this.descProduto = descProduto;
-    }
-
-    public void setPrecoProduto(String precoProduto) {
-        this.precoProduto = precoProduto;
-    }
 
     public void setChavePublica(PublicKey chavePublica) {
         this.chavePublica = chavePublica;

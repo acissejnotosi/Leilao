@@ -211,16 +211,13 @@ public class InitSystem {
                     System.out.println("Qual o produto?");
                     String stringNomeProd = in.nextLine();
                     System.out.println("Produto seleciona:"+paux.listaProdutos.get((Integer.parseInt(stringNomeProd))).getName());
-                    String produtoId = paux.listaProdutos.get(Integer.parseInt(stringNomeProd)).getId();
+                    String produtoId = paux.listaProdutos.get(Integer.parseInt(stringNomeProd)).getId(); //produto Id do leiloero
                     //******************************************************
                     //Informações do leiloero que estou dando lance
                     String sid = paux.getId();
                     String sport = paux.getPort();
                     PublicKey sPubKey = paux.getChavePublica();
-                //    String sProduto = p;
-                    String sNomeProducto = paux.getNomeProduto();
-                    String sDescProduto = paux.getDescProduto();
-                    String sPreco = paux.getPrecoProduto();
+                    String sPreco = paux.listaProdutos.get(Integer.parseInt(stringNomeProd)).getPrecoInicial();
                     
                     
                     System.out.println("Valor Inicial:" + sPreco);
@@ -244,9 +241,9 @@ public class InitSystem {
                     byte[] output = bos1.toByteArray();
                     DatagramPacket messageOut1 = new DatagramPacket(output, output.length, InetAddress.getLocalHost(), Integer.parseInt(sport));
                     System.out.println("");
-                    System.out.print("[UNICAST - SEND]");
+                    System.out.print("[UNICAST - ENVIANDO]");
                     System.out.print(" Enviando Lance para o processo de ID igual a " + paux.getId());
-                    System.out.print(" do Comprador cuja ID é " + process.getId());
+                    System.out.print(", do Comprador cuja ID é " + process.getId());
 
                     socket.send(messageOut1);
                     break;
@@ -309,28 +306,28 @@ public class InitSystem {
         return i;
    }
      
-    public static void listaProdutosUmProcesso(){
-          System.out.println("Lista de Produtos:");
-           int i =0;
-          for( Process p:processList ){
-                    i++;
-                 System.out.println(i+":"+p.getNomeProduto());
-           }              
-   }
-    public static List<String> selecioneProdutosUmProcesso(String nome){
-          System.out.println("Participantes:");
-          List<String> nomes = null;
-          int i =0;
-          for( Process p:processList ){
-              if(!p.getId().equals(nome)){
-                  i++;
-                 System.out.println(i+":"+p.getNomeProduto());
-                   nomes.add(p.getNomeProduto());
-                   
-              }
-         } 
-         return nomes;
-   }
+//    public static void listaProdutosUmProcesso(){
+//          System.out.println("Lista de Produtos:");
+//           int i =0;
+//          for( Process p:processList ){
+//                    i++;
+//                 System.out.println(i+":"+p.getNomeProduto());
+//           }              
+//   }
+//    public static List<String> selecioneProdutosUmProcesso(String nome){
+//          System.out.println("Participantes:");
+//          List<String> nomes = null;
+//          int i =0;
+//          for( Process p:processList ){
+//              if(!p.getId().equals(nome)){
+//                  i++;
+//                 System.out.println(i+":"+p.getNomeProduto());
+//                   nomes.add(p.getNomeProduto());
+//                   
+//              }
+//         } 
+//         return nomes;
+//   }
 
     public static char getTipo() {
         return tipo;
