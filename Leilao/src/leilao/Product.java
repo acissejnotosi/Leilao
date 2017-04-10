@@ -5,14 +5,17 @@
  */
 package leilao;
 
+import java.io.Serializable;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  *
  * @author allan
  */
-public class Product {
+public class Product implements Serializable {
     
+    //private static final long serialVersionUID;
     private String id;
     private String name;
     private String descricao;
@@ -25,8 +28,13 @@ public class Product {
         this.descricao = descricao;
         this.precoInicial = precoInicial;
         this.tempoFinal = tempoFinal;
+        
+        
     }
 
+    
+    
+    
     public String getId() {
         return id;
     }

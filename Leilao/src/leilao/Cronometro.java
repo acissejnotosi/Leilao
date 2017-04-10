@@ -28,11 +28,11 @@ public class Cronometro extends Thread {
     
     DatagramSocket socket = null;
     Process processo =null;
-    String nomeProduto;
+    String idProduto;
 
-    Cronometro(DatagramSocket socket, String nomeProduto ) {
+    Cronometro(DatagramSocket socket, String idProduto ) {
        this.socket = socket;
-       this.nomeProduto = nomeProduto;
+       this.idProduto = idProduto;
             
     }
     @Override
@@ -52,7 +52,7 @@ public class Cronometro extends Thread {
                 }
                 
                 for(Controle c:  procesosInteresados){
-                    if (c.getProdutoId().equals(nomeProduto)) {
+                    if (c.getProdutoId().equals(idProduto)) {
                             for(Process p: InitSystem.processList){
                                 if(p.getId().equals(c.getLancadorId())){ 
                                     processo =p;
@@ -67,7 +67,7 @@ public class Cronometro extends Thread {
                  oos1.writeChar('F');
                  oos1.writeUTF(processo.getId());
                  oos1.writeUTF(processo.getPort());
-                 oos1.writeUTF(processo.getNomeProduto());
+                 oos1.writeUTF(processo.getListaProdutos().get(Integer.parseInt(idProduto)).getName());
                  oos1.flush();
                 
                 byte[] output = bos1.toByteArray();
@@ -75,7 +75,7 @@ public class Cronometro extends Thread {
                 System.out.println("");    
                 System.out.print("[UNICAST - SEND]");
                 System.out.print("Vencedor do leilo: " + processo.getId());
-                System.out.print("Produto arrematado:" + nomeProduto);     
+                System.out.print("Produto arrematado:" + processo.getListaProdutos().get(Integer.parseInt(idProduto)).getName());     
                 socket.send(request);
                 System.out.println("");
             }

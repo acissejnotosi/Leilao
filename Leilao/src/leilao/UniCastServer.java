@@ -19,6 +19,7 @@ import static leilao.InitSystem.chave_publica;
 import static leilao.InitSystem.procesosInteresados;
 import static leilao.InitSystem.processList;
 import static leilao.InitSystem.produtosLancados;
+import static leilao.InitSystem.selecionarProdutosUmProcesso2;
 import org.omg.PortableServer.LifespanPolicy;
 
 /**
@@ -135,10 +136,14 @@ public class UniCastServer extends Thread {
 
                         System.out.println("");
                         System.out.print("[UNICAST - RECEIVE]");
-                        System.out.println("Requisicao de lance de processo: " + pid);
+                        System.out.println("Requisicao de lance do processo: " + pid);
+                        System.out.print(", valor do lance: " + lance);
 
                         // verifica valor do lance maior de que valor do produto
-                        if (Integer.parseInt(process.listaProdutos.get(Integer.parseInt(idProduto)).getPrecoInicial()) > Integer.parseInt(lance)) {
+                         
+                        List<String> nomeProdutos = selecionarProdutosUmProcesso2(process);
+                        
+                        if (Integer.parseInt(process.getListaProdutos().get(0).getPrecoInicial()) > Integer.parseInt(lance)) {
                             System.out.println("Valor do Lance não é suficiente!");
                             break;
                         }
@@ -282,5 +287,19 @@ public class UniCastServer extends Thread {
         s.send(messageOut);
 
     }
+    
+    public static List<String> selecionarProdutosUmProcesso2(Process paux){
+          
+         List<String> idProdutosPAUmProcesso = null;
+        System.out.println("Lista de produtos:");
+          int i=0;        
+          for( Product p: paux.getListaProdutos() ){
+                System.out.println( i+ "- " + "Nome do produto desse processo:" + p.getName());
+                i++;
+           }         
+          
+          return idProdutosPAUmProcesso;
+          
+   }
 
 }
