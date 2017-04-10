@@ -160,12 +160,13 @@ public class InitSystem {
         byte[] m = bos.toByteArray();
         DatagramPacket messageOut = new DatagramPacket(m, m.length, group, PORT_MULTICAST);
 
-        System.out.println("\n[MULTICAST SEND] Sending information about this new process:");
+        System.out.println("\n[MULTICAST SEND] Enviando a informação sobre este novo processo:");
         System.out.print("[MULTICAST SEND]");
         System.out.print(" ID do participante: " + id);
         System.out.print(", Porta: " + port);
         System.out.print(", Chave publica: - ");
-        System.out.print(", Tamanho da lista de produtos: " + listaProdutos.size());
+        System.out.print(", nomeProduto: " + process.getListaProdutos().get(0).getName());
+        System.out.print(", Tamanho da lista de produtos: " + listaProdutos.size() + "\n");
 
         s.send(messageOut);
 
@@ -208,9 +209,13 @@ public class InitSystem {
                     
                     List<String> nomeProdutos = selecionarProdutosUmProcesso2(paux);
                     
-                    System.out.println("Qual o produto?");
+                    System.out.println("Qual o índice desejado?");
                     String stringNomeProd = in.nextLine();
-                    System.out.println("Produto seleciona:"+paux.listaProdutos.get((Integer.parseInt(stringNomeProd))).getName());
+                    
+                    //*************************************************
+                    //Procura  id para o nome de produto correspondente
+                  
+                   System.out.println("Produto seleciona: " + paux.listaProdutos.get(Integer.parseInt(stringNomeProd)).getName());
                     String produtoId = paux.listaProdutos.get(Integer.parseInt(stringNomeProd)).getId(); //produto Id do leiloero
                     //******************************************************
                     //Informações do leiloero que estou dando lance
@@ -242,9 +247,8 @@ public class InitSystem {
                     DatagramPacket messageOut1 = new DatagramPacket(output, output.length, InetAddress.getLocalHost(), Integer.parseInt(sport));
                     System.out.println("");
                     System.out.print("[UNICAST - ENVIANDO]");
-                    System.out.print(" Enviando Lance para o processo de ID igual a " + paux.getId());
-                    System.out.print(", do Comprador cuja ID é " + process.getId());
-
+                    System.out.print(" Enviando Lance " + lance + " para o processo de ID igual a " + paux.getId());
+                  
                     socket.send(messageOut1);
                     break;
 
@@ -270,10 +274,10 @@ public class InitSystem {
           
          List<String> idProdutosPAUmProcesso = null;
         System.out.println("Lista de produtos:");
-                  
+          int i=0;        
           for( Product p: paux.getListaProdutos() ){
-                 System.out.println("Nome do produto desse processo:" + p.getName());
-                 idProdutosPAUmProcesso.add(p.getId());
+                System.out.println( i+ "- " + "Nome do produto desse processo:" + p.getName());
+                i++;
            }         
           
           return idProdutosPAUmProcesso;
@@ -287,14 +291,23 @@ public class InitSystem {
                  System.out.println(p.imprimaProcessos());
            }              
    }
-    public static List<String> listarPartipantes( String nome){
+    public static List<String> listarPartipantes( String id){
         
-           List<String> nomes = new ArrayList();    
+           List<String> nomes = new ArrayList();
+          int i=0; 
+          
+          System.out.println("size: " + processList.size());
           for( Process p:processList ){
-              if(!p.getId().equals(nome)){
-                   System.out.println(p.imprimaParticipantes());
+              
+              if(p.getId().equals(id)){
+                 System.out.println("entrar"); 
+                  i++;
+              }
+              
+              if(!p.getId().equals(id)){
+                   System.out.println(i + "- " +p.imprimaParticipantes());
                    nomes.add(p.getId());
-                   
+                   i++;
               }
          } 
          return nomes;
@@ -337,7 +350,19 @@ public class InitSystem {
         InitSystem.tipo = tipo;
     }
     
-   
+    public int procuraIndexListaProdutos(String nomeProduto, Process paux){
+     
+        int index;
+            for(Product l : paux.getListaProdutos())
+                    {
+                        if(l.getName().equals(nomeProduto)){
+                          
+                        }       
+                    }
+        
+     return -1;               
+        
+    }
        
         
    
