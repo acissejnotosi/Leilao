@@ -212,7 +212,7 @@ public class ReadingThread extends Thread {
 
         for (Process p : processList) {
             if (p.getId().equals(id)) {
-                p.getListaProdutos().remove(p.getListaProdutos());
+                p.getListaProdutos().remove(product);
             }
         }
 
