@@ -16,13 +16,16 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static leilao.InitSystem.assinatura;
 import static leilao.InitSystem.listaProdutos;
+import static leilao.InitSystem.myChavePrivada;
 import static leilao.InitSystem.procesosInteresados;
 import static leilao.InitSystem.processList;
 
@@ -59,11 +62,12 @@ public class ReadingThread extends Thread {
     public void run() {
 
         byte[] buffer;
-        char type; // type of message
+        char type; 
         DatagramPacket messageIn;
         byte[] msg;
         ByteArrayInputStream bis;
         ObjectInputStream ois;
+        GeraChave gera_chave = null;
         while (true) {
             try {
                 buffer = new byte[1024];
@@ -77,21 +81,17 @@ public class ReadingThread extends Thread {
                 ois = new ObjectInputStream(bis);
                 type = ois.readChar();
                 // ********************************************
-                // types supported:
-                // N --> Novo participante(pega a chave public dele e distribui)
-                // M --> For mining and key validation
-                // V --> Transaction confirmation
 
                 switch (type) {
 
                     case 'N':
                         String pid = ois.readUTF();
 
-                        // if msg id is of the this process, ignores it.
+                       
                         if (pid.equals(process.getId())) {
                             break;
                         } else {
-                             System.out.println("Lista size"+listaProdutos.size());
+                           
                             // *********************************************
                             // Desempacotando o resto da mensagem
                             
@@ -112,6 +112,17 @@ public class ReadingThread extends Thread {
                             // *********************************************
                             // Enviando para o novo processo essas informações
                             // Packing the message.
+                            
+                            // *********************************************
+                           // Gerando Hash Map Encripta
+                           // Packing the message.
+                           Autenticacao auto = new Autenticacao();
+                           auto.setPublic_chave(chavePublica);
+                           gera_chave = new GeraChave();
+//                           byte [] tmp = gera_chave.criptografa(pid,myChavePrivada);
+//                           auto.setCriptografado(tmp);
+//                           assinatura.put(pid, auto);
+                            
                             ByteArrayOutputStream bos = new ByteArrayOutputStream(10);
                             ObjectOutputStream oos = new ObjectOutputStream(bos);
                             oos.writeChar('N');
@@ -119,13 +130,14 @@ public class ReadingThread extends Thread {
                             oos.writeUTF(process.getPort());
                             oos.writeObject(process.getChavePublica());
                             oos.writeObject(produtos);
-
+//                            oos.writeInt(tmp.length);
+//                            oos.write(tmp);
                             oos.flush();
 
                             byte[] output = bos.toByteArray();
                             DatagramPacket messageOut = new DatagramPacket(output, output.length, messageIn.getAddress(), Integer.parseInt(port));
                             System.out.println("");
-                            System.out.print("[MULTICAST - RECEIVE]");
+                            System.out.print("[MULTICAST - recebe]");
                             System.out.print(" ID do participante: " + pid);
                             System.out.print(", Porta: " + port);
                             System.out.print(", Chave publica: - ");
@@ -137,7 +149,7 @@ public class ReadingThread extends Thread {
                             }
 
                             System.out.println("");
-                            System.out.print("[UNICAST - SEND]");
+                            System.out.print("[UNICAST - envia]");
                             System.out.print(" ID do participante: " + process.getId());
                             System.out.print(", Porta: " + process.getPort());
                             System.out.print(", Chave publica: - ");
@@ -148,18 +160,17 @@ public class ReadingThread extends Thread {
                                 System.out.println(", Preço Produto " + p.getName() + ": " + p.getPrecoInicial());
                             }
                             socket.send(messageOut);
-                            System.out.println("Lista size"+listaProdutos.size());
+                           
                             break;
                         }
 
                     case 'A':
                         // *********************************************
-                        // Unpacking rest of the message update price of protucts
-
+                  
                         String id = ois.readUTF();
                         if (!process.getId().equals(id)) {
                             // Debug recebi  atualizaço de prooduto
-                            System.out.print("[MULTICAST - RECEIVE]");
+                            System.out.print("[MULTICAST - Recebe]");
                             System.out.print("Atualizacao de produto leiloeiro: " + id);
 
                         }
@@ -171,16 +182,16 @@ public class ReadingThread extends Thread {
                         
                       case 'R':
                         // *********************************************
-                        // Unpacking rest of the message update price of protucts
+ 
                         String vencedorID= ois.readUTF();
                         String produtoID =  ois.readUTF();
 
                         // *********************************************
                         // Atualizando Novo Proprietario                        
-                        System.out.print("[MULTICAST - RECEIVE]");
+                        System.out.print("[MULTICAST - Envia]");
                         System.out.print(" ID do participante: " + vencedorID);
                         atualizaProprientario(vencedorID,produtoID);
-                        
+                   
                         
                         break;
 
@@ -221,9 +232,9 @@ public class ReadingThread extends Thread {
 
         for (Product p : listaProdutos) {
             if (p.getId().equals(idProduto)) {
-                    retornaListadeProdutosdeProcesso();
+       
                     p.setIdProcesso(idProcesso);
-                    retornaListadeProdutosdeProcesso();
+     
             }
         }
 
@@ -258,5 +269,7 @@ public class ReadingThread extends Thread {
 
         }
     }
+
+  
 
 }

@@ -100,7 +100,7 @@ public class Cronometro extends Thread {
             byte[] output = bos1.toByteArray();
             DatagramPacket request = new DatagramPacket(output, output.length, InetAddress.getLocalHost(), Integer.parseInt(ProcessoVencedorPort));
             System.out.println("");
-            System.out.print("[UNICAST - SEND]");
+            System.out.print("[UNICAST - enviado]");
             System.out.print("Vencedor do leilo: " + ProcessoVencedorId);
             System.out.print("Produto arrematado:" + idProduto);
             socket.send(request);
@@ -108,7 +108,7 @@ public class Cronometro extends Thread {
             System.out.println("");
 
             System.out.println("");
-            System.out.print("[MULTICAST - SEND]");
+            System.out.print("[MULTICAST - enviando]");
             System.out.print("Atualiza valores de produto");
 
              // *********************************************

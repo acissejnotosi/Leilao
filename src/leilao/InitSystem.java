@@ -40,8 +40,9 @@ public class InitSystem {
     static List<Controle> procesosInteresados = new ArrayList<>();
     static List<String> produtosLancados = new ArrayList<>();
     static List<Product> listaProdutos = new ArrayList<>();
+    static Map<String, Autenticacao> assinatura = new HashMap<String, Autenticacao>();
     static PublicKey mychavePublica = null;
-    static PrivateKey myChavePrivada= null;
+    static PrivateKey myChavePrivada = null;
     static boolean lance = false;
     static char tipo;
 
@@ -77,35 +78,34 @@ public class InitSystem {
         Random gerador = new Random();
 
         //imprime sequência de 4 números inteiros aleatórios
-        int k = gerador.nextInt(8) + 1;
-        String com = String.valueOf(k);
-        StringBuilder strBuilder = new StringBuilder(com);
-        for (int i = 0; i < 3; i++) {
-            k = gerador.nextInt(8) + 1;
-            strBuilder.append(String.valueOf(k));
-
-        }
-
+//        int k = gerador.nextInt(8) + 1;
+//        String com = String.valueOf(k);
+//        StringBuilder strBuilder = new StringBuilder(com);
+//        for (int i = 0; i < 3; i++) {
+//            k = gerador.nextInt(8) + 1;
+//            strBuilder.append(String.valueOf(k));
+//
+//        }
         Scanner in = new Scanner(System.in);
         System.out.println("Informe o número do participante:");
-        id = name;
+        id =  in.nextLine();
 
         System.out.println("Informe a porta para comunicação UNICAST:");
-//      port = in.nextLine();
-        port = strBuilder.toString();
+        port = in.nextLine();
+//        port = strBuilder.toString();
 
         System.out.println("Informe o nome do produto:");
-//      nomeProduto = in.nextLine();
-        nomeProduto = strBuilder.toString();
+        nomeProduto = in.nextLine();
+//        nomeProduto = strBuilder.toString();
         System.out.println("Informe o id do produto:");
-//       idProduto = in.nextLine();
-        idProduto = strBuilder.toString();
+        idProduto = in.nextLine();
+//        idProduto = strBuilder.toString();
         System.out.println("Informe descricao do produto:");
-//      descProduto = in.nextLine();
-        descProduto = strBuilder.toString();
+        descProduto = in.nextLine();
+//        descProduto = strBuilder.toString();
         System.out.println("Informe o preço do produto:");
-//      precoProduto = in.nextLine();
-        precoProduto = strBuilder.toString();
+        precoProduto = in.nextLine();
+//        precoProduto = strBuilder.toString();
         // ********************************************
         // Generating keys for this process
         gera_chave = new GeraChave();
@@ -156,8 +156,8 @@ public class InitSystem {
         byte[] m = bos.toByteArray();
         DatagramPacket messageOut = new DatagramPacket(m, m.length, group, PORT_MULTICAST);
 
-        System.out.println("\n[MULTICAST SEND] Enviando a informação sobre este novo processo:");
-        System.out.print("[MULTICAST SEND]");
+        System.out.println("\n[MULTICAST enviando] Enviando a informação sobre este novo processo:");
+        System.out.print("[MULTICAST enviando]");
         System.out.print(" ID do participante: " + id);
         System.out.print(", Porta: " + port);
         System.out.print(", Chave publica: - ");
@@ -174,7 +174,7 @@ public class InitSystem {
             System.out.println("Pressione a tecla desejada:");
             System.out.println("[B] Dar um lance em um produto ");
             System.out.println("[L] Lista os processos ");
-            System.out.println("[E] to Exit");
+            System.out.println("[S]  Sair");
             cmd = in.nextLine().trim().toUpperCase();
             System.out.println("");
 
@@ -205,9 +205,10 @@ public class InitSystem {
                     }
 
                     List<String> nomeProdutos = selecionarProdutosUmProcesso(paux);
-                    if(nomeProdutos.size()==0)
+                    if (nomeProdutos.size() == 0) {
                         break;
-                    System.out.println("Qual o índice desejado?");
+                    }
+                    System.out.println("Lista de produtos - Qual o índice desejado?");
                     String stringNomeProd = in.nextLine();
 
                     //*************************************************
@@ -267,7 +268,7 @@ public class InitSystem {
     }
 
     public static void listarProcessos() {
-        System.out.println("List of Process:");
+        System.out.println("Lista de Processos:");
 
         for (Process p : processList) {
             System.out.println(p.imprimaProcessos());
@@ -337,7 +338,6 @@ public class InitSystem {
 //        return idProdutosPAUmProcesso;
 //
 //    }
-
     public static List<String> selecionarProdutosUmProcesso(Process paux) {
 
         List<String> idProdutosPAUmProcesso = new ArrayList<>();
@@ -351,15 +351,16 @@ public class InitSystem {
             }
 
         }
-        System.out.println("--------------"+idProdutosPAUmProcesso.size());
+
         return idProdutosPAUmProcesso;
     }
+
     public static Product buscaUmProdutoPorId(String id) {
-        
-        Product pro = null; 
+
+        Product pro = null;
         for (Product p : listaProdutos) {
             if (p.getId().equals(id)) {
-                pro =p;
+                pro = p;
             }
 
         }

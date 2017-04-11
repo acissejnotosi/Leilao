@@ -58,7 +58,7 @@ public class GeraChave {
     /**
      * Criptografa o texto puro usando chave pública.
      */
-    public  byte[] criptografa(String texto, PublicKey chave) {
+    public  byte[] criptografa(String texto, PrivateKey chave) {
         byte[] cipherText = null;
 
         try {
@@ -76,7 +76,7 @@ public class GeraChave {
     /**
      * Decriptografa o texto puro usando chave privada.
      */
-    public  String decriptografa(byte[] texto, PrivateKey chave) {
+    public  String decriptografa(byte[] texto, PublicKey chave) {
         byte[] dectyptedText = null;
 
         try {
