@@ -18,6 +18,7 @@ import java.net.SocketException;
 import java.security.PublicKey;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static leilao.InitSystem.listaProdutos;
 import static leilao.InitSystem.procesosInteresados;
 
 /**
@@ -60,22 +61,21 @@ public class Cronometro extends Thread {
             }
 //              Procurando produtos
             Product product = null;
-            for (Product pro : leiloero.getListaProdutos()) {
+            for (Product pro : listaProdutos) {
                 if (pro.getId().equals(idProduto)) {
                     product = pro;
                     break;
                 }
 
             }
-                //remove produto do leiloeiro
+             //remove produto do leiloeiro
             ///Adiciona Produto no processo local
-//                leiloero.getListaProdutos().remove(product);
+//          leiloero.getListaProdutos().remove(product);
             System.out.println("Tempo de leilao Finalizado!");
             for (Controle c : procesosInteresados) {
                 if (c.getProdutoId().equals(idProduto)) {
                     for (Process p : InitSystem.processList) {
                         if (p.getId().equals(c.getUltimo())) {
-                            p.getListaProdutos().add(product);
                             processo = p;
                             break;
                         }
@@ -112,10 +112,8 @@ public class Cronometro extends Thread {
             ByteArrayOutputStream bos = new ByteArrayOutputStream(10);
             ObjectOutputStream oos = new ObjectOutputStream(bos);
             oos.writeChar('R');
-            oos1.writeUTF(leiloero.getId());
-            oos1.writeUTF(processo.getId());
-            oos1.writeUTF(processo.getPort());
-            oos1.writeObject(product);
+            oos.writeUTF(processo.getId());
+            oos.writeUTF(product.getId());
             oos.flush();
 
             byte[] m1 = bos.toByteArray();

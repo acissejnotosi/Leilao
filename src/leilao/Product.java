@@ -21,14 +21,15 @@ public class Product implements Serializable {
     private String descricao;
     private String precoInicial;
     private String tempoFinal;
+    private String idProcesso;
 
-    public Product(String id, String name, String descricao, String precoInicial, String tempoFinal) {
+    public Product(String id, String name, String descricao, String precoInicial, String tempoFinal,String idProcesso) {
         this.id = id;
         this.name = name;
         this.descricao = descricao;
         this.precoInicial = precoInicial;
         this.tempoFinal = tempoFinal;
-        
+        this.idProcesso = idProcesso;
     }
 
     
@@ -73,6 +74,16 @@ public class Product implements Serializable {
     public void setTempoFinal(String tempoFinal) {
         this.tempoFinal = tempoFinal;
     }
+
+    public String getIdProcesso() {
+        return idProcesso;
+    }
+
+    public void setIdProcesso(String idProcesso) {
+        this.idProcesso = idProcesso;
+    }
+    
+    
     
 
    

@@ -22,19 +22,19 @@ class Process implements Serializable {
     private  String descProduto;
     private  String precoProduto;
     private  PublicKey chavePublica;
-    static ArrayList<Product> listaProdutos = new ArrayList<>();
+//    public ArrayList<Product> listaProdutos = new ArrayList<>();
 
-    public Process(String id, String port, PublicKey chavePublica, ArrayList<Product> listaProdutos) {
+    public Process(String id, String port, PublicKey chavePublica) {
         this.id = id;
         this.port = port;
         this.chavePublica = chavePublica;
-        this.listaProdutos = listaProdutos;
+//        this.listaProdutos = listaProdutos;
 
     }
 
-    public static ArrayList<Product> getListaProdutos() {
-        return listaProdutos;
-    }
+//    public  ArrayList<Product> getListaProdutos() {
+//        return listaProdutos;
+//    }
 
    
     public String getId() {

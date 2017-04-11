@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static leilao.InitSystem.listaProdutos;
 import static leilao.InitSystem.processList;
 
 /**
@@ -91,15 +92,20 @@ public class ReadingThread extends Thread {
                         } else {
                             // *********************************************
                             // Desempacotando o resto da mensagem
+                            
                             String port = ois.readUTF();
                             PublicKey chavePublica = (PublicKey) ois.readObject();
                             List<Product> listaProduto = (ArrayList<Product>) ois.readObject();
+                            
+                            // *********************************************
+                            // Adicionado lista de Produtos a minha lista de Produtos local
+                             adicionaListaDeProdutos(pid,listaProduto);
 
                             // *********************************************
                             // Criando um novo processo e adicionando na lista de processos
-                            Process novoProcesso = new Process(pid, port, chavePublica, (ArrayList<Product>) listaProduto);
+                            Process novoProcesso = new Process(pid, port, chavePublica);
                             InitSystem.processList.add(novoProcesso);
-
+                            List<Product> produtos = retornaListadeProdutosdeProcesso(process.getId());
                             // *********************************************
                             // Enviando para o novo processo essas informações
                             // Packing the message.
@@ -109,7 +115,7 @@ public class ReadingThread extends Thread {
                             oos.writeUTF(process.getId());
                             oos.writeUTF(process.getPort());
                             oos.writeObject(process.getChavePublica());
-                            oos.writeObject(process.getListaProdutos());
+                            oos.writeObject(produtos);
 
                             oos.flush();
 
@@ -129,10 +135,10 @@ public class ReadingThread extends Thread {
 
                             System.out.println("");
                             System.out.print("[UNICAST - SEND]");
-                            System.out.print(" ID do participante: " + pid);
-                            System.out.print(", Porta: " + port);
+                            System.out.print(" ID do participante: " + process.getId());
+                            System.out.print(", Porta: " + process.getPort());
                             System.out.print(", Chave publica: - ");
-                            for (Product p : listaProduto) {
+                            for (Product p : retornaListadeProdutosdeProcesso(process.getId())) {
                                 System.out.println("Informações sobre o " + p.getName() + " produto da lista do processo " + pid);
                                 System.out.println(", ID Produto " + p.getName() + ": " + p.getId());
                                 System.out.println(", Descrição Produto " + p.getName() + ": " + p.getDescricao());
@@ -143,7 +149,7 @@ public class ReadingThread extends Thread {
                         }
 
                     case 'A':
-                            // *********************************************
+                        // *********************************************
                         // Unpacking rest of the message update price of protucts
 
                         String id = ois.readUTF();
@@ -155,19 +161,19 @@ public class ReadingThread extends Thread {
                         }
                         String idProduto = ois.readUTF();
                         String novoValor = ois.readUTF();
-                        atualizaValorProduto(id,idProduto, novoValor);
+                        atualizaValorProduto(idProduto, novoValor);
                         break;
                         
                         
                       case 'R':
                         // *********************************************
                         // Unpacking rest of the message update price of protucts
-                        String leiloeiroID = ois.readUTF();
-                        Product meuProduto = (Product) ois.readObject();
+                        String vencedorID= ois.readUTF();
+                        String produto =  ois.readUTF();
                   
                         System.out.print("[MULTICAST - RECEIVE]");
-                        System.out.print(" ID do participante: " + leiloeiroID);
-                        removeProdutoDeUmLeiloero(leiloeiroID,meuProduto);
+                        System.out.print(" ID do participante: " + vencedorID);
+                        atualizaProprientario(vencedorID,produto);
                         break;
 
                 }
@@ -194,28 +200,41 @@ public class ReadingThread extends Thread {
 
     }
 
-    public void atualizaValorProduto(String id ,String idProduto, String novoValor) {
-
-        for (Process p : processList) {
-            if (p.getId().equals(id)) {
-                for (Product pro : p.getListaProdutos()) {
-                    if (pro.getId().equals(idProduto)) {
-                        pro.setPrecoInicial(novoValor);
-                        break;
-                    }
-                }
+    public void atualizaValorProduto(String idProduto, String novoValor) {
+        for (Product p : listaProdutos) {
+            if (p.getId().equals(idProduto)) {
+                p.setPrecoInicial(novoValor);
             }
+
         }
 
     }
-     public void removeProdutoDeUmLeiloero(String id ,Product  product) {
-
-        for (Process p : processList) {
-            if (p.getId().equals(id)) {
-                p.getListaProdutos().remove(product);
+    public void atualizaProprientario(String idProcesso, String idProduto ) {
+        for (Product p : listaProdutos) {
+            if (p.getId().equals(idProduto)) {
+                    p.setIdProcesso(idProcesso);
             }
         }
+    }
 
+     public void adicionaListaDeProdutos(String id , List<Product> listaProduto) {
+
+        for (Product p : listaProduto) {
+                listaProdutos.add(p);
+        }
+
+    }
+     
+    public List<Product> retornaListadeProdutosdeProcesso(String idProcesso) {
+         
+       List<Product> produtos = new ArrayList<>();
+        for (Product p : listaProdutos) {
+            if (p.getIdProcesso().equals(idProcesso)) {
+                produtos.add(p);
+            }
+
+        }
+        return produtos;
     }
 
 }

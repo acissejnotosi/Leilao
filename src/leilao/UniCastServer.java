@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static leilao.InitSystem.chave_publica;
+import static leilao.InitSystem.listaProdutos;
 import static leilao.InitSystem.procesosInteresados;
 import static leilao.InitSystem.processList;
 import static leilao.InitSystem.produtosLancados;
@@ -110,7 +111,7 @@ public class UniCastServer extends Thread {
 
                         // *********************************************
                         // Creating new process and add in the list of process
-                        Process novoProcesso = new Process(pid, port, chavePublica, (ArrayList<Product>) listaProduto);
+                        Process novoProcesso = new Process(pid, port, chavePublica);
 
                         InitSystem.processList.add(novoProcesso);
                         System.out.println("");
@@ -142,9 +143,11 @@ public class UniCastServer extends Thread {
                         System.out.print(", valor do lance: " + lance);
 
                         // verifica valor do lance maior de que valor do produto
-                        List<String> nomeProdutos = selecionarProdutosUmProcesso2(process);
-
-                        if (Integer.parseInt(process.getListaProdutos().get(0).getPrecoInicial()) > Integer.parseInt(lance)) {
+                         Product produto = buscaUmProdutoPorId(idProduto);
+                        int to =Integer.parseInt(produto.getPrecoInicial());
+                        System.out.println(to);
+                        System.out.println(lance);
+                        if (to > Integer.parseInt(lance)) {
                             System.out.println("Valor do Lance não é suficiente!");
                             break;
                         }
@@ -163,16 +166,13 @@ public class UniCastServer extends Thread {
                             }
                         }
                         //atualiza valor do proiduto local
-                        for (Process p : processList) {
+                        for (Product p : listaProdutos) {
                             if (p.getId().equals(pid)) {
-                                 for(Product pro : p.getListaProdutos()){
-                                        if(pro.getId().equals(idProduto)){
-                                            pro.setPrecoInicial(lance);
-                                            break;
-                                        }
-                                 }
+                                    p.setPrecoInicial(lance);
+                                    break;
+                                }
                             }
-                        }
+                  
 
                         // Enviar multcast atualizando valor do produto 
                         if (lancar) {
@@ -217,12 +217,9 @@ public class UniCastServer extends Thread {
                         System.out.print(" ID do participante: " + pid);
                         System.out.print(", Porta: " + port);
                         System.out.println("\nProduto arrematado com sucesso: " + meuProduto.getName());
-                        procuraUmprocessoAdicionaProdutoComprado(pid,meuProduto);
-                        System.out.println("depois");
-                        //remove produto do cliente
-//                        Process leiloeiro = procuraUmprocesso(leiloeiroID);
-//                        leiloeiro.getListaProdutos().remove(meuProduto);
-                       
+                        //adiciona produto comprado aminha lista
+                        meuProduto.setIdProcesso(process.getId());
+                        listaProdutos.add(meuProduto);
 
                          break;
 
@@ -314,20 +311,6 @@ public class UniCastServer extends Thread {
         return process;
 
     }
-    
-    public static void procuraUmprocessoAdicionaProdutoComprado(String id, Product product) {
-
-        Process process = null;
-
-        for (Process p : processList) {
-            if (p.getId().equals(id)) {
-                process.getListaProdutos().add(product);
-            }
-        }
-
-
-    }
-   
 
     public static void adiconaProcessoInteresado(String idProcesso, String idProduto) {
 
@@ -349,17 +332,13 @@ public class UniCastServer extends Thread {
         }
     }
 
-    public static List<String> selecionarProdutosUmProcesso2(Process paux) {
 
-        List<String> idProdutosPAUmProcesso = null;
-        System.out.println("Lista de produtos:");
-        int i = 0;
-        for (Product p : paux.getListaProdutos()) {
-            System.out.println(i + "- " + "Nome do produto desse processo:" + p.getName());
-            i++;
+     public static Product buscaUmProdutoPorId(String id) {
+        for (Product p : listaProdutos) {
+            if (p.getId().equals(id)) {
+               return p;
+            }
         }
-
-        return idProdutosPAUmProcesso;
-
+        return null;
     }
 }

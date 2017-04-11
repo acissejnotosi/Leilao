@@ -75,7 +75,7 @@ public class InitSystem {
         //instância um objeto da classe Random usando o construtor padrão
         Random gerador = new Random();
 
-        //imprime sequência de 10 números inteiros aleatórios
+        //imprime sequência de 4 números inteiros aleatórios
         int k = gerador.nextInt(8) + 1;
         String com = String.valueOf(k);
         StringBuilder strBuilder = new StringBuilder(com);
@@ -113,20 +113,20 @@ public class InitSystem {
         chave_publica = gera_chave.getChavePublica();
 
         //*********************************************
-        //Cria um novo produto
-        product = new Product(idProduto, nomeProduto, descProduto, precoProduto, tempoFinal);
-
-        //*********************************************
-        //Adiciona o produto a lista de produtos
-        InitSystem.listaProdutos.add(product);
-
-        //*********************************************
         //Cria um novo processo
-        process = new Process(id, port, chave_publica, (ArrayList<Product>) InitSystem.listaProdutos);
+        process = new Process(id, port, chave_publica);
 
         //*********************************************
         //Adiciona o processo a lista de processos
         InitSystem.processList.add(process);
+
+        //*********************************************
+        //Cria um novo produto
+        product = new Product(idProduto, nomeProduto, descProduto, precoProduto, tempoFinal, id);
+
+        //*********************************************
+        //Adiciona o produto a lista de produtos
+        InitSystem.listaProdutos.add(product);
 
         Controle controle = new Controle(idProduto, precoProduto);
         procesosInteresados.add(controle);
@@ -144,7 +144,7 @@ public class InitSystem {
         // Inicialização da comunicação Multicast
         ReadingThread multCastComm = new ReadingThread(process, IP_MULTICAST, PORT_MULTICAST);
         multCastComm.start();
-        
+
         //**********************************************
         //Inicialização da comunicação Unicast
         UniCastServer uniCastComm = new UniCastServer(process, IP_MULTICAST, PORT_MULTICAST);
@@ -160,7 +160,7 @@ public class InitSystem {
         System.out.print(" ID do participante: " + id);
         System.out.print(", Porta: " + port);
         System.out.print(", Chave publica: - ");
-        System.out.print(", nomeProduto: " + process.getListaProdutos().get(0).getName());
+        System.out.print(", nomeProduto: " + listaProdutos.get(0).getName());
         System.out.print(", Tamanho da lista de produtos: " + listaProdutos.size() + "\n");
         s.send(messageOut);
 
@@ -203,20 +203,23 @@ public class InitSystem {
                         }
                     }
 
-                    List<String> nomeProdutos = selecionarProdutosUmProcesso2(paux);
+                    List<String> nomeProdutos = selecionarProdutosUmProcesso(paux);
+                    if(nomeProdutos.size()==0)
+                        break;
                     System.out.println("Qual o índice desejado?");
                     String stringNomeProd = in.nextLine();
 
                     //*************************************************
                     //Procura  id para o nome de produto correspondente
-                    System.out.println("Produto seleciona: " + paux.getListaProdutos().get(Integer.parseInt(stringNomeProd)).getName());
-                    String produtoId = paux.listaProdutos.get(Integer.parseInt(stringNomeProd)).getId(); //produto Id do leiloero
+                    Product produto = buscaUmProdutoPorId(nomeProdutos.get(Integer.parseInt(stringNomeProd)));
+                    System.out.println("Produto seleciona: " + produto.getName());
+                    String produtoId = produto.getId(); //produto Id do leiloero
                     //******************************************************
                     //Informações do leiloero que estou dando lance
                     String sid = paux.getId();
                     String sport = paux.getPort();
                     PublicKey sPubKey = paux.getChavePublica();
-                    String sPreco = paux.listaProdutos.get(Integer.parseInt(stringNomeProd)).getPrecoInicial();
+                    String sPreco = produto.getPrecoInicial();
 
                     System.out.println("Valor Inicial:" + sPreco);
                     System.out.println("Qual valor do seu lance");
@@ -320,18 +323,44 @@ public class InitSystem {
         InitSystem.tipo = tipo;
     }
 
-    public static List<String> selecionarProdutosUmProcesso2(Process paux) {
+//    public static List<String> selecionarProdutosUmProcesso2(Process paux) {
+//
+//        List<String> idProdutosPAUmProcesso = null;
+//        System.out.println("Lista de produtos:");
+//        int i = 0;
+//        for (Product p : paux.getListaProdutos()) {
+//            System.out.println(i + "- " + "Nome do produto desse processo:" + p.getName());
+//            i++;
+//        }
+//
+//        return idProdutosPAUmProcesso;
+//
+//    }
 
-        List<String> idProdutosPAUmProcesso = null;
+    public static List<String> selecionarProdutosUmProcesso(Process paux) {
+
+        List<String> idProdutosPAUmProcesso = new ArrayList<>();
         System.out.println("Lista de produtos:");
         int i = 0;
-        for (Product p : paux.getListaProdutos()) {
-            System.out.println(i + "- " + "Nome do produto desse processo:" + p.getName());
-            i++;
+        for (Product p : listaProdutos) {
+            if (p.getIdProcesso().equals(paux.getId())) {
+                System.out.println(i + "- " + "Nome do produto desse processo:" + p.getName());
+                idProdutosPAUmProcesso.add(p.getId());
+                i++;
+            }
+
         }
-
         return idProdutosPAUmProcesso;
-
     }
+    public static Product buscaUmProdutoPorId(String id) {
+        
+        Product pro = null; 
+        for (Product p : listaProdutos) {
+            if (p.getId().equals(id)) {
+                pro =p;
+            }
 
+        }
+        return pro;
+    }
 }
