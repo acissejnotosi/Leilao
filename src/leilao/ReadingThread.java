@@ -160,11 +160,14 @@ public class ReadingThread extends Thread {
                         
                         
                       case 'R':
-                            // *********************************************
+                        // *********************************************
                         // Unpacking rest of the message update price of protucts
-                          System.out.println("Remove Produto!");
-
-
+                        String leiloeiroID = ois.readUTF();
+                        Product meuProduto = (Product) ois.readObject();
+                  
+                        System.out.print("[MULTICAST - RECEIVE]");
+                        System.out.print(" ID do participante: " + leiloeiroID);
+                        removeProdutoDeUmLeiloero(leiloeiroID,meuProduto);
                         break;
 
                 }
@@ -197,11 +200,19 @@ public class ReadingThread extends Thread {
             if (p.getId().equals(id)) {
                 for (Product pro : p.getListaProdutos()) {
                     if (pro.getId().equals(idProduto)) {
-                        System.out.println("Atualizaei--------------------------"+novoValor);
                         pro.setPrecoInicial(novoValor);
                         break;
                     }
                 }
+            }
+        }
+
+    }
+     public void removeProdutoDeUmLeiloero(String id ,Product  product) {
+
+        for (Process p : processList) {
+            if (p.getId().equals(id)) {
+                p.getListaProdutos().remove(p.getListaProdutos());
             }
         }
 
