@@ -23,28 +23,28 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static leilao.InitSystem.assinatura;
-import static leilao.InitSystem.listaProdutos;
-import static leilao.InitSystem.myChavePrivada;
-import static leilao.InitSystem.procesosInteresados;
-import static leilao.InitSystem.processList;
+import static leilao.Inicial.assinatura;
+import static leilao.Inicial.listaProdutos;
+import static leilao.Inicial.myChavePrivada;
+import static leilao.Inicial.procesosInteresados;
+import static leilao.Inicial.processList;
 
 /**
  *
  * @author a1562711
  */
-public class ReadingThread extends Thread {
+public class ServidorMultiCast extends Thread {
 
     String leitura1 = " ";
     Scanner scan = new Scanner(System.in);
     MulticastSocket s;
     InetAddress group;
-    Process process = null;
+    Processo process = null;
     DatagramSocket socket = null;
     String ipMulticast = null;
     int portMulticast = 0;
 
-    public ReadingThread(Process process, String ipMulticast, int portMulticast) throws SocketException, UnknownHostException, IOException {
+    public ServidorMultiCast(Processo process, String ipMulticast, int portMulticast) throws SocketException, UnknownHostException, IOException {
         this.socket = new DatagramSocket();
         this.process = process;
         this.ipMulticast = ipMulticast;
@@ -67,7 +67,7 @@ public class ReadingThread extends Thread {
         byte[] msg;
         ByteArrayInputStream bis;
         ObjectInputStream ois;
-        GeraChave gera_chave = null;
+        Chaves gera_chave = null;
         while (true) {
             try {
                 buffer = new byte[1024];
@@ -97,7 +97,7 @@ public class ReadingThread extends Thread {
                             
                             String port = ois.readUTF();
                             PublicKey chavePublica = (PublicKey) ois.readObject();
-                            List<Product> listaProduto = (ArrayList<Product>) ois.readObject();
+                            List<Produto> listaProduto = (ArrayList<Produto>) ois.readObject();
                             
                             // *********************************************
                             // Adicionado lista de Produtos a minha lista de Produtos local
@@ -106,9 +106,9 @@ public class ReadingThread extends Thread {
 
                             // *********************************************
                             // Criando um novo processo e adicionando na lista de processos
-                            Process novoProcesso = new Process(pid, port, chavePublica);
-                            InitSystem.processList.add(novoProcesso);
-                            List<Product> produtos = retornaListadeProdutosdeProcesso(process.getId());
+                            Processo novoProcesso = new Processo(pid, port, chavePublica);
+                            Inicial.processList.add(novoProcesso);
+                            List<Produto> produtos = retornaListadeProdutosdeProcesso(process.getId());
                             // *********************************************
                             // Enviando para o novo processo essas informações
                             // Packing the message.
@@ -118,7 +118,7 @@ public class ReadingThread extends Thread {
                            // Packing the message.
                            Autenticacao auto = new Autenticacao();
                            auto.setPublic_chave(chavePublica);
-                           gera_chave = new GeraChave();
+                           gera_chave = new Chaves();
 //                           byte [] tmp = gera_chave.criptografa(pid,myChavePrivada);
 //                           auto.setCriptografado(tmp);
 //                           assinatura.put(pid, auto);
@@ -141,7 +141,7 @@ public class ReadingThread extends Thread {
                             System.out.print(" ID do participante: " + pid);
                             System.out.print(", Porta: " + port);
                             System.out.print(", Chave publica: - ");
-                            for (Product p : listaProduto) {
+                            for (Produto p : listaProduto) {
                                 System.out.println("Informações sobre o " + p.getName() + " produto da lista do processo " + pid);
                                 System.out.println(", ID Produto " + p.getName() + ": " + p.getId());
                                 System.out.println(", Descrição Produto " + p.getName() + ": " + p.getDescricao());
@@ -153,7 +153,7 @@ public class ReadingThread extends Thread {
                             System.out.print(" ID do participante: " + process.getId());
                             System.out.print(", Porta: " + process.getPort());
                             System.out.print(", Chave publica: - ");
-                            for (Product p : retornaListadeProdutosdeProcesso(process.getId())) {
+                            for (Produto p : retornaListadeProdutosdeProcesso(process.getId())) {
                                 System.out.println("Informações sobre o " + p.getName() + " produto da lista do processo " + pid);
                                 System.out.println(", ID Produto " + p.getName() + ": " + p.getId());
                                 System.out.println(", Descrição Produto " + p.getName() + ": " + p.getDescricao());
@@ -198,18 +198,18 @@ public class ReadingThread extends Thread {
                 }
 
             } catch (IOException ex) {
-                Logger.getLogger(ReadingThread.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ServidorMultiCast.class.getName()).log(Level.SEVERE, null, ex);
             } catch (ClassNotFoundException ex) {
-                Logger.getLogger(ReadingThread.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ServidorMultiCast.class.getName()).log(Level.SEVERE, null, ex);
 
             }
 
         }
     }
 
-    public Process ProcuraProcesso(String id) {
-        Process processo = null;
-        for (Process p : processList) {
+    public Processo ProcuraProcesso(String id) {
+        Processo processo = null;
+        for (Processo p : processList) {
             if (p.getId().equals(id)) {
                 processo = p;
                 break;
@@ -220,7 +220,7 @@ public class ReadingThread extends Thread {
     }
 
     public void atualizaValorProduto(String idProduto, String novoValor) {
-        for (Product p : listaProdutos) {
+        for (Produto p : listaProdutos) {
             if (p.getId().equals(idProduto)) {
                 p.setPrecoInicial(novoValor);
             }
@@ -230,7 +230,7 @@ public class ReadingThread extends Thread {
     }
     public static void atualizaProprientario(String idProcesso, String idProduto ) {
 
-        for (Product p : listaProdutos) {
+        for (Produto p : listaProdutos) {
             if (p.getId().equals(idProduto)) {
        
                     p.setIdProcesso(idProcesso);
@@ -240,9 +240,9 @@ public class ReadingThread extends Thread {
 
     }
 
-     public void adicionaListaDeProdutos(String id , List<Product> listaProduto) {
+     public void adicionaListaDeProdutos(String id , List<Produto> listaProduto) {
 
-        for (Product p : listaProduto) {
+        for (Produto p : listaProduto) {
                 listaProdutos.add(p);
                 Controle controle = new Controle(p.getId(),p.getPrecoInicial());
                 procesosInteresados.add(controle);
@@ -250,10 +250,10 @@ public class ReadingThread extends Thread {
 
     }
      
-    public List<Product> retornaListadeProdutosdeProcesso(String idProcesso) {
+    public List<Produto> retornaListadeProdutosdeProcesso(String idProcesso) {
          
-       List<Product> produtos = new ArrayList<>();
-        for (Product p : listaProdutos) {
+       List<Produto> produtos = new ArrayList<>();
+        for (Produto p : listaProdutos) {
             if (p.getIdProcesso().equals(idProcesso)) {
                 produtos.add(p);
             }
@@ -264,7 +264,7 @@ public class ReadingThread extends Thread {
      public static void retornaListadeProdutosdeProcesso() {
          
          
-        for (Product p : listaProdutos) {
+        for (Produto p : listaProdutos) {
               System.out.println("Processo"+p.getIdProcesso()+"produto"+p.getId());
 
         }

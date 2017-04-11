@@ -22,7 +22,7 @@ import javax.crypto.Cipher;
  *
  * @author Jessica
  */
-public class GeraChave {
+public class Chaves {
     
     public PrivateKey chavePrivada;
     public PublicKey chavePublica;

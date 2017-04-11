@@ -7,7 +7,7 @@ package leilao;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static leilao.InitSystem.procesosInteresados;
+import static leilao.Inicial.procesosInteresados;
 
 /**
  *
@@ -40,7 +40,7 @@ public class Temporizador extends Thread{
                 }
         }      
         String chart = "F";
-        InitSystem.setTipo(chart.charAt(0)); 
+        Inicial.setTipo(chart.charAt(0)); 
         System.out.println("Tempo Finalizado!!");
                              
     
