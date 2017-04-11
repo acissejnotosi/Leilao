@@ -23,6 +23,7 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static leilao.InitSystem.listaProdutos;
+import static leilao.InitSystem.procesosInteresados;
 import static leilao.InitSystem.processList;
 
 /**
@@ -90,6 +91,7 @@ public class ReadingThread extends Thread {
                         if (pid.equals(process.getId())) {
                             break;
                         } else {
+                             System.out.println("Lista size"+listaProdutos.size());
                             // *********************************************
                             // Desempacotando o resto da mensagem
                             
@@ -100,6 +102,7 @@ public class ReadingThread extends Thread {
                             // *********************************************
                             // Adicionado lista de Produtos a minha lista de Produtos local
                              adicionaListaDeProdutos(pid,listaProduto);
+                      
 
                             // *********************************************
                             // Criando um novo processo e adicionando na lista de processos
@@ -145,6 +148,7 @@ public class ReadingThread extends Thread {
                                 System.out.println(", Preço Produto " + p.getName() + ": " + p.getPrecoInicial());
                             }
                             socket.send(messageOut);
+                            System.out.println("Lista size"+listaProdutos.size());
                             break;
                         }
 
@@ -169,11 +173,15 @@ public class ReadingThread extends Thread {
                         // *********************************************
                         // Unpacking rest of the message update price of protucts
                         String vencedorID= ois.readUTF();
-                        String produto =  ois.readUTF();
-                  
+                        String produtoID =  ois.readUTF();
+
+                        // *********************************************
+                        // Atualizando Novo Proprietario                        
                         System.out.print("[MULTICAST - RECEIVE]");
                         System.out.print(" ID do participante: " + vencedorID);
-                        atualizaProprientario(vencedorID,produto);
+                        atualizaProprientario(vencedorID,produtoID);
+                        
+                        
                         break;
 
                 }
@@ -209,18 +217,24 @@ public class ReadingThread extends Thread {
         }
 
     }
-    public void atualizaProprientario(String idProcesso, String idProduto ) {
+    public static void atualizaProprientario(String idProcesso, String idProduto ) {
+
         for (Product p : listaProdutos) {
             if (p.getId().equals(idProduto)) {
+                    retornaListadeProdutosdeProcesso();
                     p.setIdProcesso(idProcesso);
+                    retornaListadeProdutosdeProcesso();
             }
         }
+
     }
 
      public void adicionaListaDeProdutos(String id , List<Product> listaProduto) {
 
         for (Product p : listaProduto) {
                 listaProdutos.add(p);
+                Controle controle = new Controle(p.getId(),p.getPrecoInicial());
+                procesosInteresados.add(controle);
         }
 
     }
@@ -235,6 +249,14 @@ public class ReadingThread extends Thread {
 
         }
         return produtos;
+    }
+     public static void retornaListadeProdutosdeProcesso() {
+         
+         
+        for (Product p : listaProdutos) {
+              System.out.println("Processo"+p.getIdProcesso()+"produto"+p.getId());
+
+        }
     }
 
 }
