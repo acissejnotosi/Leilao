@@ -6,6 +6,7 @@
 package leilao;
 
 import java.io.Serializable;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
 
@@ -22,20 +23,28 @@ class Process implements Serializable {
     private  String descProduto;
     private  String precoProduto;
     private  PublicKey chavePublica;
-//    public ArrayList<Product> listaProdutos = new ArrayList<>();
+    private  PrivateKey chavePrivada;
 
+    
+    
+     // ********************************************
+     // Construtor do processo recebidos multcast
     public Process(String id, String port, PublicKey chavePublica) {
         this.id = id;
         this.port = port;
         this.chavePublica = chavePublica;
-//        this.listaProdutos = listaProdutos;
+
 
     }
-
-//    public  ArrayList<Product> getListaProdutos() {
-//        return listaProdutos;
-//    }
-
+     // ********************************************
+     // Construtor do processo meu processo
+    public Process(String id, String port, PublicKey chavePublica, PrivateKey chavePrivada) {
+        this.id = id;
+        this.port = port;
+        this.chavePublica = chavePublica;
+        this.chavePrivada = chavePrivada;
+    }
+   
    
     public String getId() {
         return id;

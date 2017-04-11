@@ -28,17 +28,19 @@ import static leilao.InitSystem.procesosInteresados;
 public class Cronometro extends Thread {
 
     DatagramSocket socket = null;
-    Process processo = null;
+//    Process processo = null;
     String idProduto;
-    Process leiloero = null;
+    String leiloeroId = null;
     MulticastSocket s= null;
+    String ProcessoVencedorId =null;
+    String ProcessoVencedorPort =null;
     int MULT_PORT = 0;
    
    InetAddress group = null;
-    Cronometro(DatagramSocket socket, String idProduto, Process leiloero, MulticastSocket s, InetAddress group, int MULT_PORT) {
+    Cronometro(DatagramSocket socket, String idProduto, String leiloeroId, MulticastSocket s, InetAddress group, int MULT_PORT) {
         this.socket = socket;
         this.idProduto = idProduto;
-        this.leiloero = leiloero;
+        this.leiloeroId = leiloeroId;
         this.s=s;
         this.group= group;
         this.MULT_PORT = MULT_PORT;
@@ -68,36 +70,38 @@ public class Cronometro extends Thread {
                 }
 
             }
-             //remove produto do leiloeiro
-            ///Adiciona Produto no processo local
-//          leiloero.getListaProdutos().remove(product);
+
             System.out.println("Tempo de leilao Finalizado!");
             for (Controle c : procesosInteresados) {
                 if (c.getProdutoId().equals(idProduto)) {
                     for (Process p : InitSystem.processList) {
                         if (p.getId().equals(c.getUltimo())) {
-                            processo = p;
+                            ProcessoVencedorId = c.getUltimo();
+                            ProcessoVencedorPort =p.getPort();
                             break;
                         }
                     }
                 }
             }
-                // *********************************************
+             // *********************************************
             // 
             ByteArrayOutputStream bos1 = new ByteArrayOutputStream(10);
             ObjectOutputStream oos1 = new ObjectOutputStream(bos1);
             oos1.writeChar('F');
-            oos1.writeUTF(leiloero.getId());
-            oos1.writeUTF(processo.getId());
-            oos1.writeUTF(processo.getPort());
+            System.out.println(ProcessoVencedorId);
+            System.out.println(ProcessoVencedorPort);
+            
+            oos1.writeUTF(leiloeroId);
+            oos1.writeUTF(ProcessoVencedorId);
+            oos1.writeUTF(ProcessoVencedorPort);
             oos1.writeObject(product);
             oos1.flush();
 
             byte[] output = bos1.toByteArray();
-            DatagramPacket request = new DatagramPacket(output, output.length, InetAddress.getLocalHost(), Integer.parseInt(processo.getPort()));
+            DatagramPacket request = new DatagramPacket(output, output.length, InetAddress.getLocalHost(), Integer.parseInt(ProcessoVencedorPort));
             System.out.println("");
             System.out.print("[UNICAST - SEND]");
-            System.out.print("Vencedor do leilo: " + processo.getId());
+            System.out.print("Vencedor do leilo: " + ProcessoVencedorId);
             System.out.print("Produto arrematado:" + idProduto);
             socket.send(request);
 
@@ -112,7 +116,7 @@ public class Cronometro extends Thread {
             ByteArrayOutputStream bos = new ByteArrayOutputStream(10);
             ObjectOutputStream oos = new ObjectOutputStream(bos);
             oos.writeChar('R');
-            oos.writeUTF(processo.getId());
+            oos.writeUTF(ProcessoVencedorId);
             oos.writeUTF(product.getId());
             oos.flush();
 

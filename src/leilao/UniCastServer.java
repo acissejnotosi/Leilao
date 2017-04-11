@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static leilao.InitSystem.chave_publica;
 import static leilao.InitSystem.listaProdutos;
 import static leilao.InitSystem.procesosInteresados;
 import static leilao.InitSystem.processList;
@@ -112,20 +111,26 @@ public class UniCastServer extends Thread {
                         // *********************************************
                         // Creating new process and add in the list of process
                         Process novoProcesso = new Process(pid, port, chavePublica);
-
                         InitSystem.processList.add(novoProcesso);
+                        // *********************************************
+                        // Adicionando aminha Lista de Produtos produto recebido
+                        adicionaListaDeProdutos(process.getId(),listaProduto);
+                        
+                        System.out.println("Lista size novo unicas "+listaProdutos.size());
+                        System.out.println("Lista size novo recebida "+listaProduto.size());
                         System.out.println("");
                         System.out.print("[UNICAST - RECEIVE]");
                         System.out.print(" ID do participante: " + pid);
                         System.out.print(", Porta: " + port);
                         System.out.print(", Chave publica: - ");
+                        
                         for (Product p : listaProduto) {
                             System.out.println("Informações sobre o " + p.getName() + " produto da lista do processo " + pid);
                             System.out.println(", ID Produto " + p.getName() + ": " + p.getId());
                             System.out.println(", Descrição Produto " + p.getName() + ": " + p.getDescricao());
                             System.out.println(", Preço Produto " + p.getName() + ": " + p.getPrecoInicial());
                         }
-                        ;
+                        System.out.println("Lista size novo unicast "+listaProdutos.size());
 
                         break;
 
@@ -178,7 +183,7 @@ public class UniCastServer extends Thread {
                         if (lancar) {
                         //setar controlador de lances
                             adiconaProcessoInteresado(pid, idProduto);
-                            Cronometro cro = new Cronometro(socket, idProduto,process,s,group,MULT_PORT);
+                            Cronometro cro = new Cronometro(socket, idProduto,process.getId(),s,group,MULT_PORT);
                             cro.start();
                             System.out.println("Leilao Inicializado produtoID:" + idProduto);
                             /// Enviando atualizacao de preco para todo multicast 
@@ -205,7 +210,7 @@ public class UniCastServer extends Thread {
                         break;
                     case ('F'):
                         //Finaliza Leilao tempo estorado
-                        System.out.println("cheguei");
+     
                         String leiloeiroID = ois.readUTF();
                         pid = ois.readUTF();
                         port = ois.readUTF();
@@ -217,9 +222,6 @@ public class UniCastServer extends Thread {
                         System.out.print(" ID do participante: " + pid);
                         System.out.print(", Porta: " + port);
                         System.out.println("\nProduto arrematado com sucesso: " + meuProduto.getName());
-                        //adiciona produto comprado aminha lista
-                        meuProduto.setIdProcesso(process.getId());
-                        listaProdutos.add(meuProduto);
 
                          break;
 
@@ -313,7 +315,7 @@ public class UniCastServer extends Thread {
     }
 
     public static void adiconaProcessoInteresado(String idProcesso, String idProduto) {
-
+     
         for (Controle c : procesosInteresados) {
             if (c.getProdutoId().equals(idProduto)) {
                 c.setUltimo(idProcesso);
@@ -340,5 +342,14 @@ public class UniCastServer extends Thread {
             }
         }
         return null;
+    }
+     public void adicionaListaDeProdutos(String id , List<Product> listaProduto) {
+
+        for (Product p : listaProduto) {
+                listaProdutos.add(p);
+                Controle controle = new Controle(p.getId(),p.getPrecoInicial());
+                procesosInteresados.add(controle);
+        }
+
     }
 }

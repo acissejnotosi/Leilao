@@ -40,7 +40,8 @@ public class InitSystem {
     static List<Controle> procesosInteresados = new ArrayList<>();
     static List<String> produtosLancados = new ArrayList<>();
     static List<Product> listaProdutos = new ArrayList<>();
-    static PublicKey chave_publica = null;
+    static PublicKey mychavePublica = null;
+    static PrivateKey myChavePrivada= null;
     static boolean lance = false;
     static char tipo;
 
@@ -109,12 +110,12 @@ public class InitSystem {
         // Generating keys for this process
         gera_chave = new GeraChave();
         gera_chave.geraChave();
-        chave_privada = gera_chave.getChavePrivada();
-        chave_publica = gera_chave.getChavePublica();
+        myChavePrivada = gera_chave.getChavePrivada();
+        mychavePublica = gera_chave.getChavePublica();
 
         //*********************************************
         //Cria um novo processo
-        process = new Process(id, port, chave_publica);
+        process = new Process(id, port, mychavePublica);
 
         //*********************************************
         //Adiciona o processo a lista de processos
@@ -136,7 +137,7 @@ public class InitSystem {
         oos.writeChar('N');
         oos.writeUTF(id);
         oos.writeUTF(port);
-        oos.writeObject(chave_publica);
+        oos.writeObject(mychavePublica);
         oos.writeObject(InitSystem.listaProdutos);
         oos.flush();
 
@@ -350,6 +351,7 @@ public class InitSystem {
             }
 
         }
+        System.out.println("--------------"+idProdutosPAUmProcesso.size());
         return idProdutosPAUmProcesso;
     }
     public static Product buscaUmProdutoPorId(String id) {
