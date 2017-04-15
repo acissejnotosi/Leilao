@@ -114,14 +114,11 @@ public class ServidorMultiCast extends Thread {
                             // Packing the message.
                             
                             // *********************************************
-                           // Gerando Hash Map Encripta
-                           // Packing the message.
-                           Autenticacao auto = new Autenticacao();
-                           auto.setPublic_chave(chavePublica);
-                           gera_chave = new Chaves();
-//                           byte [] tmp = gera_chave.criptografa(pid,myChavePrivada);
-//                           auto.setCriptografado(tmp);
-//                           assinatura.put(pid, auto);
+                            // Guardando Hash Map chavePublica
+                            Autenticacao auto = new Autenticacao();
+                            auto.setPublic_chave(chavePublica);
+                            gera_chave = new Chaves();
+                            assinatura.put(pid, auto);
                             
                             ByteArrayOutputStream bos = new ByteArrayOutputStream(10);
                             ObjectOutputStream oos = new ObjectOutputStream(bos);

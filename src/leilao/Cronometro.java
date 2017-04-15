@@ -83,7 +83,7 @@ public class Cronometro extends Thread {
                     }
                 }
             }
-             // *********************************************
+            // *********************************************
             // 
             ByteArrayOutputStream bos1 = new ByteArrayOutputStream(10);
             ObjectOutputStream oos1 = new ObjectOutputStream(bos1);
@@ -111,7 +111,7 @@ public class Cronometro extends Thread {
             System.out.print("[MULTICAST - enviando]");
             System.out.print("Atualiza valores de produto");
 
-             // *********************************************
+            // *********************************************
             // Empacotando mensagem
             ByteArrayOutputStream bos = new ByteArrayOutputStream(10);
             ObjectOutputStream oos = new ObjectOutputStream(bos);

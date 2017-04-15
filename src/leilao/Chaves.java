@@ -39,7 +39,7 @@ public class Chaves {
         try {
             
             final KeyPairGenerator keyGen = KeyPairGenerator.getInstance(ALGORITHM);
-            keyGen.initialize(1024);
+            keyGen.initialize(512);
             final KeyPair key = keyGen.generateKeyPair();
 
             this.chavePrivada = key.getPrivate();//.getEncoded();
@@ -80,8 +80,7 @@ public class Chaves {
         byte[] dectyptedText = null;
 
         try {
-            final Cipher cipher = Cipher.getInstance(ALGORITHM);
-            // Decriptografa o texto puro usando a chave Privada
+            Cipher cipher = Cipher.getInstance("RSA");
             cipher.init(Cipher.DECRYPT_MODE, chave);
             dectyptedText = cipher.doFinal(texto);
 
@@ -89,7 +88,7 @@ public class Chaves {
             ex.printStackTrace();
         }
 
-        return new String(dectyptedText);
+       return new String(dectyptedText);
     }
 
     public PrivateKey getChavePrivada() {

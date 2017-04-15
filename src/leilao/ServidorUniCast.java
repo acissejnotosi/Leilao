@@ -65,7 +65,7 @@ public class ServidorUniCast extends Thread {
         DatagramPacket messageIn;
         ByteArrayInputStream bis;
         ObjectInputStream ois;
-        Chaves gera_chave = null;
+        Chaves gera_chave = new Chaves();
 
         while (true) {
 
@@ -109,11 +109,10 @@ public class ServidorUniCast extends Thread {
                         adicionaListaDeProdutos(process.getId(), listaProduto);
 
                         // *********************************************
-                        // Gerando Hash Map Encripta
+                        // Gerando Hash Map chavePublica
                         Autenticacao auto = new Autenticacao();
                         auto.setPublic_chave(chavePublica);
                         gera_chave = new Chaves();
-                        auto.setCriptografado(gera_chave.criptografa(pid,myChavePrivada));
                         assinatura.put(pid, auto);
 
                        // System.out.println("Lista size novo unicas " + listaProdutos.size());
@@ -140,22 +139,28 @@ public class ServidorUniCast extends Thread {
                         pid = ois.readUTF();
                         port = ois.readUTF();
                         String lance = ois.readUTF();
- 
                         idProduto = ois.readUTF(); //Id produto do processo atual(leiloero)
-//                        int tamanho = ois.readInt();//Id produto do processo atual(leiloero)
-//      
-//                        byte[] mensagemCripto = new byte[tamanho];
-//                        for (int i = 0; i < tamanho; i++) {
-//                            mensagemCripto[i] = ois.readByte();
-//                        }
-//                        gera_chave = new GeraChave();
-//                        
-//                        String mensagemDescripta = gera_chave.decriptografa(mensagemCripto,assinatura.get(pid).getPublic_chave());
-//                        
-//                        //Compara mensagem  
-//                        if(mensagemDescripta.equals(pid)){
-//                            System.out.println("-----Autentica-------------");
-//                        }
+
+                        Integer tamanho = ois.read();//Id produto do processo atual(leiloero)
+                        // *********************************************
+                        // Lendo byte array
+                        byte[] mensagemCripto = new byte[tamanho];
+                        for (int i = 0; i < tamanho; i++) {
+                            mensagemCripto[i] = ois.readByte();
+                        }
+                        
+                        PublicKey chavePublica1 = assinatura.get(pid).getPublic_chave();
+                        
+                        // *********************************************
+                        // Descriptografando mensagem recebido com chaave Publicado do Processo que enviou requisiço
+                        String decrypedText = gera_chave.decriptografa(mensagemCripto,chavePublica1 );
+                        
+
+                        // *********************************************
+                        // Comparamdo atuendicidade da mensagem de assinatura
+                        if(decrypedText.equals("kkkk")){
+                            System.out.println("-----Autentica-------------");
+                        }
                         
                         
                         

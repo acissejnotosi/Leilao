@@ -238,7 +238,12 @@ public class Inicial {
                     System.out.println("- Digite o valor do seu lance:");
                     String lance = in.nextLine();
                     System.out.println("- Seu lance foi de:" + lance + " reais ");
-
+                    
+                    // *********************************************
+                    // encriptografando meu nome com minha privda
+                     byte[] encryptedText = gera_chave.criptografa("kkkk",myChavePrivada);
+            
+  
                     // *********************************************
                     //empacotando mensagem apra mandar em unicast
                     ByteArrayOutputStream bos1 = new ByteArrayOutputStream(10);
@@ -248,7 +253,8 @@ public class Inicial {
                     oos1.writeUTF(process.getPort());
                     oos1.writeUTF(lance);
                     oos1.writeUTF(produtoId);
-
+                    oos1.write(encryptedText.length);
+                    oos1.write(encryptedText);
                     oos1.flush();
 
                     //*****************************************************
