@@ -13,7 +13,7 @@ import java.util.Objects;
  *
  * @author allan
  */
-public class Product implements Serializable {
+public class Produto implements Serializable {
     
 
     private String id;
@@ -23,7 +23,7 @@ public class Product implements Serializable {
     private String tempoFinal;
     private String idProcesso;
 
-    public Product(String id, String name, String descricao, String precoInicial, String tempoFinal,String idProcesso) {
+    public Produto(String id, String name, String descricao, String precoInicial, String tempoFinal,String idProcesso) {
         this.id = id;
         this.name = name;
         this.descricao = descricao;

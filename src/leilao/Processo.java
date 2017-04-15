@@ -10,7 +10,7 @@ import java.util.ArrayList;
  *
  * @author Jessica
  */
-class Process implements Serializable {
+class Processo implements Serializable {
 
     private  String id;
     private  String port;
@@ -25,7 +25,7 @@ class Process implements Serializable {
     
      // ********************************************
      // Construtor do processo recebidos multcast
-    public Process(String id, String port, PublicKey chavePublica) {
+    public Processo(String id, String port, PublicKey chavePublica) {
         this.id = id;
         this.port = port;
         this.chavePublica = chavePublica;
@@ -34,7 +34,7 @@ class Process implements Serializable {
     }
      // ********************************************
      // Construtor do processo meu processo
-    public Process(String id, String port, PublicKey chavePublica, PrivateKey chavePrivada) {
+    public Processo(String id, String port, PublicKey chavePublica, PrivateKey chavePrivada) {
         this.id = id;
         this.port = port;
         this.chavePublica = chavePublica;

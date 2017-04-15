@@ -18,8 +18,8 @@ import java.net.SocketException;
 import java.security.PublicKey;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static leilao.InitSystem.listaProdutos;
-import static leilao.InitSystem.procesosInteresados;
+import static leilao.Inicial.listaProdutos;
+import static leilao.Inicial.procesosInteresados;
 
 /**
  *
@@ -62,8 +62,8 @@ public class Cronometro extends Thread {
                 Thread.sleep(10000);
             }
 //              Procurando produtos
-            Product product = null;
-            for (Product pro : listaProdutos) {
+            Produto product = null;
+            for (Produto pro : listaProdutos) {
                 if (pro.getId().equals(idProduto)) {
                     product = pro;
                     break;
@@ -74,7 +74,7 @@ public class Cronometro extends Thread {
             System.out.println("Tempo de leilao Finalizado!");
             for (Controle c : procesosInteresados) {
                 if (c.getProdutoId().equals(idProduto)) {
-                    for (Process p : InitSystem.processList) {
+                    for (Processo p : Inicial.processList) {
                         if (p.getId().equals(c.getUltimo())) {
                             ProcessoVencedorId = c.getUltimo();
                             ProcessoVencedorPort =p.getPort();
