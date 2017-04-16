@@ -168,7 +168,10 @@ public class Inicial {
         System.out.print(", nomeProduto: " + listaProdutos.get(0).getName());
         System.out.print(", Tamanho da lista de produtos: " + listaProdutos.size() + "\n");
         s.send(messageOut);
-
+        
+        
+        
+        
         // *********************************************
         // Fase de interação do processo sobre o sistema.
         while (true) {

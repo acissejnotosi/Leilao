@@ -20,6 +20,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import static leilao.Inicial.listaProdutos;
 import static leilao.Inicial.procesosInteresados;
+import static leilao.Inicial.produtosLancados;
 
 /**
  *
@@ -88,9 +89,7 @@ public class Cronometro extends Thread {
             ByteArrayOutputStream bos1 = new ByteArrayOutputStream(10);
             ObjectOutputStream oos1 = new ObjectOutputStream(bos1);
             oos1.writeChar('F');
-            System.out.println(ProcessoVencedorId);
-            System.out.println(ProcessoVencedorPort);
-            
+  
             oos1.writeUTF(leiloeroId);
             oos1.writeUTF(ProcessoVencedorId);
             oos1.writeUTF(ProcessoVencedorPort);
@@ -123,6 +122,10 @@ public class Cronometro extends Thread {
             byte[] m1 = bos.toByteArray();
             DatagramPacket messageOut = new DatagramPacket(m1, m1.length, group, MULT_PORT);
             s.send(messageOut);
+            // remove da lista de produtos
+            produtosLancados.remove(idProduto);
+            procesosInteresados.get(0).setLancadorId(null);
+            procesosInteresados.get(0).setLancadorId(null);
         } catch (InterruptedException e) {
         } catch (IOException ex) {
             Logger.getLogger(Cronometro.class.getName()).log(Level.SEVERE, null, ex);
