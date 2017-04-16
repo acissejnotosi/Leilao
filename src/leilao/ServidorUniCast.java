@@ -9,6 +9,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.net.UnknownHostException;
 import java.security.PublicKey;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ public class ServidorUniCast extends Thread {
     Processo process = null;
     String MULT_IP = null;
     int MULT_PORT = 0;
+    static String  vivo = null;
 
     public ServidorUniCast(Processo p, String MULT_IP, int MULT_PORT) {
         this.process = p;
@@ -60,6 +62,15 @@ public class ServidorUniCast extends Thread {
 
     @Override
     public void run() {
+        
+        WatchDog watchdog;
+        try {
+            watchdog = new WatchDog(socket, InetAddress.getLocalHost());
+            watchdog.start();
+        } catch (UnknownHostException ex) {
+            Logger.getLogger(ServidorUniCast.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    
 
         byte[] buffer;
         DatagramPacket messageIn;
@@ -140,7 +151,6 @@ public class ServidorUniCast extends Thread {
                         port = ois.readUTF();
                         String lance = ois.readUTF();
                         idProduto = ois.readUTF(); //Id produto do processo atual(leiloero)
-
                         Integer tamanho = ois.read();//Id produto do processo atual(leiloero)
                         // *********************************************
                         // Lendo byte array
@@ -155,16 +165,12 @@ public class ServidorUniCast extends Thread {
                         // Descriptografando mensagem recebido com chaave Publicado do Processo que enviou requisiço
                         String decrypedText = gera_chave.decriptografa(mensagemCripto,chavePublica1 );
                         
-
                         // *********************************************
                         // Comparamdo atuendicidade da mensagem de assinatura
-                        if(decrypedText.equals("kkkk")){
-                            System.out.println("-----Autentica-------------");
+                        if(!decrypedText.equals("kkkk")){  
+                             ClienteNaoAutenticado(pid,port);
+                             break;
                         }
-                        
-                        
-                        
-
                         System.out.println("");
                         System.out.print("[UNICAST - Recebe]");
                         System.out.println("Requisicao de lance do processo: " + pid);
@@ -237,9 +243,7 @@ public class ServidorUniCast extends Thread {
                         pid = ois.readUTF();
                         port = ois.readUTF();
                         Produto meuProduto = (Produto) ois.readObject();
-
-                        System.out.println("depois");
-
+                        
                         System.out.print("[UNICAST - Recebe]");
                         System.out.print(" ID do participante: " + pid);
                         System.out.print(", Porta: " + port);
@@ -248,8 +252,8 @@ public class ServidorUniCast extends Thread {
                         break;
 
                     case ('U'):
-                        ////Notificaçao de lance maior 
-
+                        //*********************************************
+                        //Notificaçao de lance maior                     
                         pid = ois.readUTF();
                         idProduto = ois.readUTF();
                         String novoValor = ois.readUTF();
@@ -257,6 +261,21 @@ public class ServidorUniCast extends Thread {
                         System.out.println("[UNICAST - Recebe]");
                         System.out.println(" ID do participante deu lance maior: " + pid);
                         System.out.print(", Valor do ultimo lance:  " + novoValor);
+
+                        break;
+                    case ('K'):
+                        // *********************************************
+                        // Usuario nao autenticado
+                        pid = ois.readUTF();
+                        System.out.println("Nao foi possivel realizar seu lance assinatura errada!");
+                        break;
+                    case 'W':
+                        // *********************************************
+                        // Atualizando Novo Proprietario                        
+                        pid = ois.readUTF();
+                        // *********************************************
+                        
+                     
 
                         break;
 
@@ -276,6 +295,26 @@ public class ServidorUniCast extends Thread {
 
     public static void setTeste(boolean teste) {
         ServidorUniCast.teste = teste;
+    }
+    
+    
+    public void repostaWatch(String id, String port) throws IOException {
+
+        System.out.println("");
+        System.out.print("[UNIACAST - Enviando]");
+        
+        // *********************************************
+        // Packing transaction validation.
+        ByteArrayOutputStream bos = new ByteArrayOutputStream(10);
+        ObjectOutputStream oos = new ObjectOutputStream(bos);
+        oos.writeChar('U');
+        oos.writeUTF(id);
+        oos.flush();
+
+        byte[] output = bos.toByteArray();
+        DatagramPacket request = new DatagramPacket(output, output.length, InetAddress.getLocalHost(), Integer.parseInt(port));
+        socket.send(request);
+
     }
 
     public void atualizaValorCliente(String id, String idProduto, String novoValor) throws IOException {
@@ -315,6 +354,23 @@ public class ServidorUniCast extends Thread {
         oos.writeUTF(id);
         oos.writeUTF(idProduto);
         oos.writeUTF(novoValor);
+        oos.flush();
+
+        byte[] output = bos.toByteArray();
+        DatagramPacket request = new DatagramPacket(output, output.length, InetAddress.getLocalHost(), Integer.parseInt(port));
+        socket.send(request);
+
+    }
+       public void ClienteNaoAutenticado(String id, String port) throws IOException {
+
+        System.out.println("");
+        System.out.print("[UNIACAST - Enviando]");
+        System.out.print("Seu lance nao esta realizado, pois nao esta autenticado");
+        // *********************************************
+        // Packing transaction validation.
+        ByteArrayOutputStream bos = new ByteArrayOutputStream(10);
+        ObjectOutputStream oos = new ObjectOutputStream(bos);
+        oos.writeChar('K');
         oos.flush();
 
         byte[] output = bos.toByteArray();
@@ -374,4 +430,17 @@ public class ServidorUniCast extends Thread {
         }
 
     }
+
+    public static String getVivo() {
+        return vivo;
+    }
+
+    public static void setVivo(String vivo) {
+        ServidorUniCast.vivo = vivo;
+    }
+
+    
+    
+    
+    
 }
